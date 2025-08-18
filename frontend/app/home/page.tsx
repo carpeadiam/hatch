@@ -1,203 +1,296 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+interface Organiser {
+  email: string;
+  name: string;
+  phone: string;
+}
 
-  const handleEmailLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Email login:', { email, password });
-    // Handle email login logic here
+interface Deliverable {
+  description: string;
+  type: string;
+}
+
+interface Phase {
+  deliverables: Deliverable[];
+  description: string;
+  endDate: string;
+  name: string;
+  startDate: string;
+}
+
+interface Prize {
+  description: string;
+  title: string;
+}
+
+interface Sponsor {
+  name: string;
+}
+
+interface Hackathon {
+  admins: string[];
+  eventDescription: string;
+  eventEndDate: string;
+  eventName: string;
+  eventStartDate: string;
+  eventTagline: string;
+  eventType: string;
+  fee?: string;
+  hackCode: string;
+  hasFee: boolean;
+  maxTeams: string;
+  mode: string;
+  organisers: Organiser[];
+  phases: Phase[];
+  prizes: Prize[];
+  registrationEndDate: string;
+  registrationStartDate: string;
+  sponsors: Sponsor[];
+  teamSize: string;
+  upiId?: string;
+}
+
+export default function HomePage() {
+  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchHackathons();
+  }, []);
+
+  const fetchHackathons = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/allHacks'
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch hackathons');
+      }
+      
+      const data = await response.json();
+      console.log(data);
+      // Filter hackathons to show only future events
+      const now = new Date();
+      
+      // Remove the filter for testing purposes to see all hackathons
+      const futureHackathons = data;
+      
+      // Or alternatively, fix the date comparison if you want to keep the filter:
+      // const futureHackathons = data.filter((hackathon: Hackathon) => {
+      //   // Parse the date properly to ensure correct comparison
+      //   const startDate = new Date(hackathon.eventStartDate);
+      //   return startDate > now;
+      // });
+      
+      console.log('Filtered hackathons:', futureHackathons.length);
+      setHackathons(futureHackathons);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleGoogleLogin = () => {
-    console.log('Google login');
-    // Handle Google login logic here
+  const calculateDaysLeft = (registrationEndDate: string): string => {
+    const now = new Date();
+    const endDate = new Date(registrationEndDate);
+    const diffTime = endDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays <= 0) {
+      return 'Registration Closed';
+    }
+    
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} left`;
   };
 
-  const handleSignUp = () => {
-    console.log('Navigate to sign up');
-    // Handle navigation to sign up page
+  const calculatePrizePool = (prizes: Prize[]): string => {
+    let total = 0;
+    
+    prizes.forEach(prize => {
+      // Extract numbers from the description
+      const numbers = prize.description.match(/\d+/g);
+      if (numbers) {
+        numbers.forEach(num => {
+          total += parseInt(num, 10);
+        });
+      }
+    });
+    
+    return total > 0 ? `₹${total.toLocaleString()}` : 'TBA';
   };
+
+  const getRegistrationFee = (hackathon: Hackathon): string => {
+    if (hackathon.hasFee && hackathon.fee) {
+      return `₹${hackathon.fee}`;
+    }
+    return 'Free';
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading hackathons...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error: {error}</p>
+          <button
+            onClick={fetchHackathons}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        {/* Logo/Illustration */}
-        <div className="flex justify-center mb-8">
-          <div className="w-[365px] h-[244px] flex items-center justify-center">
-            {/* Rocket Launch SVG Illustration */}
-            <svg width="365" height="244" viewBox="0 0 365 244" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g transform="translate(50, 20)">
-                {/* Clouds */}
-                <ellipse cx="80" cy="60" rx="25" ry="15" fill="#008622" opacity="0.3"/>
-                <ellipse cx="200" cy="40" rx="30" ry="18" fill="#008622" opacity="0.3"/>
-                <ellipse cx="260" cy="80" rx="20" ry="12" fill="#008622" opacity="0.3"/>
-                
-                {/* Main rocket body */}
-                <path d="M150 180 L150 80 Q150 60 165 60 Q180 60 180 80 L180 180 Z" fill="#008622"/>
-                
-                {/* Rocket nose cone */}
-                <path d="M150 80 Q165 40 180 80" fill="#006B1A"/>
-                
-                {/* Rocket fins */}
-                <path d="M140 160 L150 180 L150 160 Z" fill="#006B1A"/>
-                <path d="M180 160 L190 160 L180 180 Z" fill="#006B1A"/>
-                
-                {/* Window */}
-                <circle cx="165" cy="100" r="12" fill="#87CEEB"/>
-                <circle cx="165" cy="100" r="8" fill="#E6F3FF"/>
-                
-                {/* Flame/exhaust */}
-                <path d="M150 180 Q155 200 165 210 Q175 200 180 180" fill="#FF6B35"/>
-                <path d="M155 185 Q160 195 165 200 Q170 195 175 185" fill="#FFD700"/>
-                
-                {/* Stars */}
-                <circle cx="50" cy="30" r="2" fill="#008622"/>
-                <circle cx="250" cy="50" r="2" fill="#008622"/>
-                <circle cx="280" cy="30" r="2" fill="#008622"/>
-                <circle cx="40" cy="80" r="2" fill="#008622"/>
-                
-                {/* Satellite */}
-                <rect x="280" y="20" width="8" height="8" fill="#008622"/>
-                <line x1="276" y1="24" x2="292" y2="24" stroke="#008622" strokeWidth="2"/>
-                <line x1="284" y1="16" x2="284" y2="32" stroke="#008622" strokeWidth="2"/>
-                
-                {/* Planet */}
-                <circle cx="40" cy="50" r="15" fill="#008622" opacity="0.4"/>
-                <path d="M35 45 Q40 50 45 45 Q40 55 35 50" fill="#008622" opacity="0.6"/>
-              </g>
-            </svg>
-          </div>
-        </div>
-
-        {/* Hatch Title */}
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
         <div className="text-center mb-12">
-          <h1 
-            className="text-[86px] leading-none font-normal text-[#008622]"
-            style={{ 
-              fontFamily: 'Bricolage Grotesque, sans-serif',
-              fontVariationSettings: "'opsz' 14, 'wdth' 100"
-            }}
-          >
-            Hatch
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Upcoming Hackathons
           </h1>
+          <p className="text-xl text-gray-600">
+            Discover and participate in exciting hackathons
+          </p>
         </div>
 
-        {/* Login Form */}
-        <div className="space-y-6">
-          {/* Google Login Button */}
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full bg-[#232323] text-white rounded-[10px] h-[71px] flex items-center justify-center transition-opacity hover:opacity-90"
+        {/* Hackathons Grid */}
+        {hackathons.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">No hackathons available at the moment.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {hackathons.map((hackathon) => (
+              <Link
+                key={hackathon.hackCode}
+                href={`/hackathons/${hackathon.hackCode}`}
+                className="block group"
+              >
+                <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                  {/* Placeholder Image */}
+                  <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <div className="text-2xl font-bold mb-1">🚀</div>
+                        <div className="text-sm opacity-90">Hackathon</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-6">
+                    {/* Title and Tagline */}
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      {hackathon.eventName}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {hackathon.eventTagline}
+                    </p>
+
+                    {/* Event Details */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500">Mode:</span>
+                        <span className="text-gray-900 capitalize font-medium">
+                          {hackathon.mode}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500">Team Size:</span>
+                        <span className="text-gray-900 font-medium">
+                          {hackathon.teamSize} members
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500">Registration Fee:</span>
+                        <span className="text-gray-900 font-medium">
+                          {getRegistrationFee(hackathon)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Registration Status */}
+                    <div className="mb-4">
+                      <div className="text-sm">
+                        <span className="text-gray-500">Registration: </span>
+                        <span className={`font-medium ${
+                          calculateDaysLeft(hackathon.registrationEndDate) === 'Registration Closed'
+                            ? 'text-red-600'
+                            : 'text-green-600'
+                        }`}>
+                          {calculateDaysLeft(hackathon.registrationEndDate)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Prize Pool */}
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                      <div className="text-sm text-yellow-800">
+                        <span className="font-medium">Prize Pool: </span>
+                        <span className="font-bold">
+                          {calculatePrizePool(hackathon.prizes)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Event Dates */}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="text-xs text-gray-500">
+                        {new Date(hackathon.eventStartDate).toLocaleDateString()} - {' '}
+                        {new Date(hackathon.eventEndDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* View All Button */}
+        <div className="text-center">
+          <Link
+            href="/hackathons"
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
           >
-            <span 
-              className="text-[30px] font-normal"
-              style={{ 
-                fontFamily: 'Instrument Sans, sans-serif',
-                fontVariationSettings: "'wdth' 100"
-              }}
+            View All Hackathons
+            <svg 
+              className="ml-2 w-4 h-4" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
             >
-              Login with Google
-            </span>
-          </button>
-
-          {/* Or Divider */}
-          <div className="text-center">
-            <span 
-              className="text-[30px] font-normal text-black"
-              style={{ 
-                fontFamily: 'Instrument Sans, sans-serif',
-                fontVariationSettings: "'wdth' 100"
-              }}
-            >
-              Or
-            </span>
-          </div>
-
-          {/* Email/Password Form */}
-          <form onSubmit={handleEmailLogin} className="space-y-6">
-            {/* Email Field */}
-            <div className="space-y-3">
-              <label 
-                className="block text-[30px] font-normal text-[#413f3f]"
-                style={{ 
-                  fontFamily: 'Instrument Sans, sans-serif',
-                  fontVariationSettings: "'wdth' 100"
-                }}
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-[71px] bg-[#efefef] border border-[#4f4f4f] rounded-[10px] px-6 text-[20px] focus:outline-none focus:ring-2 focus:ring-[#008622] focus:border-transparent"
-                required
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M9 5l7 7-7 7" 
               />
-            </div>
-
-            {/* Password Field */}
-            <div className="space-y-3">
-              <label 
-                className="block text-[30px] font-normal text-[#413f3f]"
-                style={{ 
-                  fontFamily: 'Instrument Sans, sans-serif',
-                  fontVariationSettings: "'wdth' 100"
-                }}
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-[71px] bg-[#efefef] border border-[#4f4f4f] rounded-[10px] px-6 text-[20px] focus:outline-none focus:ring-2 focus:ring-[#008622] focus:border-transparent"
-                required
-              />
-            </div>
-
-            {/* Login Button */}
-            <button
-              type="submit"
-              className="w-full bg-[#008622] text-white rounded-[10px] h-[71px] flex items-center justify-center transition-opacity hover:opacity-90"
-            >
-              <span 
-                className="text-[30px] font-normal"
-                style={{ 
-                  fontFamily: 'Instrument Sans, sans-serif',
-                  fontVariationSettings: "'wdth' 100"
-                }}
-              >
-                Login with email
-              </span>
-            </button>
-          </form>
-
-          {/* Sign Up Link */}
-          <div className="text-center pt-4">
-            <span 
-              className="text-[30px] font-normal text-black"
-              style={{ 
-                fontFamily: 'Instrument Sans, sans-serif',
-                fontVariationSettings: "'wdth' 100"
-              }}
-            >
-              Don't have an account?{' '}
-              <button
-                onClick={handleSignUp}
-                className="font-bold text-[#008622] hover:underline"
-                style={{ 
-                  fontFamily: 'Instrument Sans, sans-serif',
-                  fontVariationSettings: "'wdth' 100"
-                }}
-              >
-                Sign up
-              </button>
-            </span>
-          </div>
+            </svg>
+          </Link>
         </div>
       </div>
     </div>

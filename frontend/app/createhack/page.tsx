@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -235,12 +234,12 @@ export default function CreateEventForm() {
         {/* Progress Bar */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div className="relative">
-            {/* Left Arrow */}
+            {/* Left Arrow - Made darker and more visible */}
             <button
             onClick={() => {
                 document.getElementById("progressBar")?.scrollBy({ left: -150, behavior: "smooth" });
             }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 p-2 bg-gray-100 rounded-full shadow hover:bg-gray-200"
+            className="absolute left-0 top-1/2 -translate-y-1/2 p-2 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-900 transition-colors z-10"
             >
             <ArrowLeft className="w-4 h-4" />
             </button>
@@ -289,12 +288,12 @@ export default function CreateEventForm() {
             })}
             </div>
 
-            {/* Right Arrow */}
+            {/* Right Arrow - Made darker and more visible */}
             <button
             onClick={() => {
                 document.getElementById("progressBar")?.scrollBy({ left: 150, behavior: "smooth" });
             }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-gray-100 rounded-full shadow hover:bg-gray-200"
+            className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-900 transition-colors z-10"
             >
             <ArrowRight className="w-4 h-4" />
             </button>
@@ -339,7 +338,8 @@ export default function CreateEventForm() {
                       <input
                         {...field}
                         type="text"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
+                        className="w-full px-3 py-2 border rounded-lg text-black placeholder-gray-500
+                        border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                         placeholder="Enter event name"
                       />
                     )}
@@ -357,7 +357,8 @@ export default function CreateEventForm() {
                       <input
                         {...field}
                         type="text"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
+                        className="w-full px-3 py-2 border rounded-lg text-black placeholder-gray-500
+                        border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                         placeholder="Enter a catchy tagline"
                       />
                     )}
@@ -375,7 +376,8 @@ export default function CreateEventForm() {
                       <textarea
                         {...field}
                         rows={4}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
+                        className="w-full px-3 py-2 border rounded-lg text-black placeholder-gray-500
+                        border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                         placeholder="Describe your event..."
                       />
                     )}
@@ -393,7 +395,7 @@ export default function CreateEventForm() {
                       render={({ field }) => (
                         <select
                           {...field}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                          className="w-full px-3 py-2 border border-gray-200 focus:border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                         >
                           <option value="hackathon">Hackathon</option>
                           <option value="quiz">Quiz</option>
@@ -446,7 +448,8 @@ export default function CreateEventForm() {
                       <input
                         {...field}
                         type="url"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
+                        className="w-full px-3 py-2 border rounded-lg text-black placeholder-gray-500
+                        border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                         placeholder="https://example.com/event-image.jpg"
                       />
                     )}
@@ -463,11 +466,11 @@ export default function CreateEventForm() {
                 {organiserFields.map((field, index) => (
                   <div key={field.id} className="border rounded-lg p-4 relative">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-medium">Prize {index + 1}</h3>
-                      {prizeFields.length > 1 && (
+                      <h3 className="text-lg font-bold text-black">Organiser {index + 1}</h3>
+                      {organiserFields.length > 1 && (
                         <button
                           type="button"
-                          onClick={() => removePrize(index)}
+                          onClick={() => removeOrganiser(index)}
                           className="text-red-500 hover:text-red-700"
                         >
                           <Trash2 className="w-5 h-5" />
@@ -475,36 +478,62 @@ export default function CreateEventForm() {
                       )}
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-base font-semibold text-gray-800 mb-2">Prize Title *</label>
+                        <label className="block text-base font-semibold text-gray-800 mb-2">Name *</label>
                         <Controller
-                          name={`prizes.${index}.title`}
+                          name={`organisers.${index}.name`}
                           control={control}
-                          rules={{ required: 'Prize title is required' }}
+                          rules={{ required: 'Organiser name is required' }}
                           render={({ field }) => (
                             <input
                               {...field}
                               type="text"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
-                              placeholder="1st Prize"
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              placeholder="John Doe"
                             />
                           )}
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-base font-semibold text-gray-800 mb-2">Description *</label>
+                        <label className="block text-base font-semibold text-gray-800 mb-2">Email *</label>
                         <Controller
-                          name={`prizes.${index}.description`}
+                          name={`organisers.${index}.email`}
                           control={control}
-                          rules={{ required: 'Prize description is required' }}
+                          rules={{ 
+                            required: 'Email is required',
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: 'Invalid email address'
+                            }
+                          }}
                           render={({ field }) => (
                             <input
                               {...field}
-                              type="text"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
-                              placeholder="₹50,000 cash prize"
+                              type="email"
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              placeholder="john@example.com"
+                            />
+                          )}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-base font-semibold text-gray-800 mb-2">Phone *</label>
+                        <Controller
+                          name={`organisers.${index}.phone`}
+                          control={control}
+                          rules={{ required: 'Phone number is required' }}
+                          render={({ field }) => (
+                            <input
+                              {...field}
+                              type="tel"
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              placeholder="+91 9876543210"
                             />
                           )}
                         />
@@ -515,11 +544,11 @@ export default function CreateEventForm() {
                 
                 <button
                   type="button"
-                  onClick={() => appendPrize({ title: '', description: '' })}
+                  onClick={() => appendOrganiser({ name: '', email: '', phone: '' })}
                   className="flex items-center px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Another Prize
+                  Add Another Organiser
                 </button>
               </div>
             )}
@@ -531,7 +560,7 @@ export default function CreateEventForm() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Event Start Date *</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">Event Start Date *</label>
                     <Controller
                         name="eventStartDate"
                         control={control}
@@ -540,7 +569,7 @@ export default function CreateEventForm() {
                         <input
                             {...field}
                             type="datetime-local"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-200 focus:border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                         />
                         )}
                     />
@@ -548,7 +577,7 @@ export default function CreateEventForm() {
                     </div>
                     
                     <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Event End Date *</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">Event End Date *</label>
                     <Controller
                         name="eventEndDate"
                         control={control}
@@ -557,7 +586,7 @@ export default function CreateEventForm() {
                         <input
                             {...field}
                             type="datetime-local"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-200 focus:border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                         />
                         )}
                     />
@@ -565,7 +594,7 @@ export default function CreateEventForm() {
                     </div>
                     
                     <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Registration Start Date *</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">Registration Start Date *</label>
                     <Controller
                         name="registrationStartDate"
                         control={control}
@@ -574,7 +603,7 @@ export default function CreateEventForm() {
                         <input
                             {...field}
                             type="datetime-local"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-200 focus:border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                         />
                         )}
                     />
@@ -582,7 +611,7 @@ export default function CreateEventForm() {
                     </div>
                     
                     <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Registration End Date *</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">Registration End Date *</label>
                     <Controller
                         name="registrationEndDate"
                         control={control}
@@ -591,7 +620,7 @@ export default function CreateEventForm() {
                         <input
                             {...field}
                             type="datetime-local"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-200 focus:border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                         />
                         )}
                     />
@@ -608,7 +637,7 @@ export default function CreateEventForm() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Max Number of Teams *</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">Max Number of Teams *</label>
                     <Controller
                         name="maxTeams"
                         control={control}
@@ -618,7 +647,8 @@ export default function CreateEventForm() {
                             {...field}
                             type="number"
                             min="1"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             placeholder="100"
                         />
                         )}
@@ -627,7 +657,7 @@ export default function CreateEventForm() {
                     </div>
                     
                     <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Team Size *</label>
+                    <label className="block text-base font-semibold text-gray-800 mb-2">Team Size *</label>
                     <Controller
                         name="teamSize"
                         control={control}
@@ -637,7 +667,8 @@ export default function CreateEventForm() {
                             {...field}
                             type="number"
                             min="1"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             placeholder="4"
                         />
                         )}
@@ -660,14 +691,14 @@ export default function CreateEventForm() {
                         />
                         )}
                     />
-                    <span className="text-sm font-medium text-gray-700">Event has registration fee</span>
+                    <span className="text-base font-semibold text-gray-800">Event has registration fee</span>
                     </label>
                 </div>
                 
                 {hasFee && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Registration Fee *</label>
+                        <label className="block text-base font-semibold text-gray-800 mb-2">Registration Fee *</label>
                         <Controller
                         name="fee"
                         control={control}
@@ -677,7 +708,8 @@ export default function CreateEventForm() {
                             {...field}
                             type="number"
                             min="0"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             placeholder="500"
                             />
                         )}
@@ -686,7 +718,7 @@ export default function CreateEventForm() {
                     </div>
                     
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">UPI ID *</label>
+                        <label className="block text-base font-semibold text-gray-800 mb-2">UPI ID *</label>
                         <Controller
                         name="upiId"
                         control={control}
@@ -695,7 +727,8 @@ export default function CreateEventForm() {
                             <input
                             {...field}
                             type="text"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             placeholder="yourname@upi"
                             />
                         )}
@@ -715,7 +748,7 @@ export default function CreateEventForm() {
                 {prizeFields.map((field, index) => (
                     <div key={field.id} className="border rounded-lg p-4 relative">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-medium">Prize {index + 1}</h3>
+                        <h3 className="text-lg font-bold text-black">Prize {index + 1}</h3>
                         {prizeFields.length > 1 && (
                         <button
                             type="button"
@@ -729,7 +762,7 @@ export default function CreateEventForm() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Prize Title *</label>
+                        <label className="block text-base font-semibold text-gray-800 mb-2">Prize Title *</label>
                         <Controller
                             name={`prizes.${index}.title`}
                             control={control}
@@ -738,7 +771,8 @@ export default function CreateEventForm() {
                             <input
                                 {...field}
                                 type="text"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 placeholder="1st Prize"
                             />
                             )}
@@ -746,7 +780,7 @@ export default function CreateEventForm() {
                         </div>
                         
                         <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                        <label className="block text-base font-semibold text-gray-800 mb-2">Description *</label>
                         <Controller
                             name={`prizes.${index}.description`}
                             control={control}
@@ -755,7 +789,8 @@ export default function CreateEventForm() {
                             <input
                                 {...field}
                                 type="text"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 placeholder="₹50,000 cash prize"
                             />
                             )}
@@ -784,7 +819,7 @@ export default function CreateEventForm() {
                 {sponsorFields.map((field, index) => (
                   <div key={field.id} className="border rounded-lg p-4 relative">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-medium">Sponsor {index + 1}</h3>
+                      <h3 className="text-lg font-bold text-black">Sponsor {index + 1}</h3>
                       {sponsorFields.length > 1 && (
                         <button
                           type="button"
@@ -806,7 +841,8 @@ export default function CreateEventForm() {
                           <input
                             {...field}
                             type="text"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             placeholder="Company name"
                           />
                         )}
@@ -834,7 +870,7 @@ export default function CreateEventForm() {
                 {phaseFields.map((phaseField, phaseIndex) => (
                   <div key={phaseField.id} className="border rounded-lg p-6 relative">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-medium">Phase {phaseIndex + 1}</h3>
+                      <h3 className="text-lg font-bold text-black">Phase {phaseIndex + 1}</h3>
                       {phaseFields.length > 1 && (
                         <button
                           type="button"
@@ -857,7 +893,8 @@ export default function CreateEventForm() {
                             <input
                               {...field}
                               type="text"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                               placeholder="Ideation Phase"
                             />
                           )}
@@ -874,7 +911,8 @@ export default function CreateEventForm() {
                             <textarea
                               {...field}
                               rows={3}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                               placeholder="Describe this phase..."
                             />
                           )}
@@ -892,7 +930,7 @@ export default function CreateEventForm() {
                               <input
                                 {...field}
                                 type="datetime-local"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                                className="w-full px-3 py-2 border border-gray-200 focus:border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                               />
                             )}
                           />
@@ -908,7 +946,7 @@ export default function CreateEventForm() {
                               <input
                                 {...field}
                                 type="datetime-local"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                                className="w-full px-3 py-2 border border-gray-200 focus:border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                               />
                             )}
                           />
@@ -917,7 +955,7 @@ export default function CreateEventForm() {
                     </div>
                     
                     <div>
-                      <h4 className="text-md font-medium text-gray-700 mb-4">Deliverables</h4>
+                      <h4 className="text-md font-bold text-gray-800 mb-4">Deliverables</h4>
                       <Controller
                         name={`phases.${phaseIndex}.deliverables`}
                         control={control}
@@ -926,7 +964,7 @@ export default function CreateEventForm() {
                             {field.value.map((deliverable, deliverableIndex) => (
                               <div key={deliverableIndex} className="border border-gray-200 rounded-lg p-4">
                                 <div className="flex justify-between items-center mb-4">
-                                  <h5 className="text-sm font-medium">Deliverable {deliverableIndex + 1}</h5>
+                                  <h5 className="text-sm font-bold text-black">Deliverable {deliverableIndex + 1}</h5>
                                   {field.value.length > 1 && (
                                     <button
                                       type="button"
@@ -955,7 +993,7 @@ export default function CreateEventForm() {
                                         };
                                         field.onChange(newDeliverables);
                                       }}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                                      className="w-full px-3 py-2 border border-gray-200 focus:border-blue-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                                     >
                                       <option value="github">GitHub Repo</option>
                                       <option value="canva">Canva Link</option>
@@ -978,7 +1016,8 @@ export default function CreateEventForm() {
                                         };
                                         field.onChange(newDeliverables);
                                       }}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
+                                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-black placeholder-gray-500
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                       placeholder="Describe the deliverable"
                                     />
                                   </div>
