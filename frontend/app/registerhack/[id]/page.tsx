@@ -71,6 +71,7 @@ interface TeamMember {
 }
 
 interface RegistrationFormData {
+  hackCode: string;
   teamLeader: TeamMember;
   teamName: string;
   teamMembers: TeamMember[];
@@ -107,6 +108,7 @@ const RegistrationPageContent = () => {
   } = useForm<RegistrationFormData>({
     mode: 'onChange',
     defaultValues: {
+      hackCode: params.id as string,
       teamLeader: {
         name: '',
         email: '',
@@ -180,18 +182,37 @@ const RegistrationPageContent = () => {
   const onSubmit: SubmitHandler<RegistrationFormData> = async (data) => {
     setSubmitting(true);
     try {
-      // API call would go here
-      console.log('Registration data:', data);
+      const authToken = localStorage.getItem('auth_token');
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (!authToken) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
+      const response = await fetch('https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/registerteam', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error occurred' }));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Registration submitted successfully:', result);
       
       alert('Registration submitted successfully!');
       reset();
       setCurrentStep(1);
-    } catch (err) {
-      console.error('Submission error:', err);
-      alert('Failed to submit registration. Please try again.');
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit registration. Please try again.';
+      alert(errorMessage);
     } finally {
       setSubmitting(false);
     }
