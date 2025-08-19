@@ -215,7 +215,7 @@ const HackathonCard = ({ hackathon, showRegisterButton = true }: { hackathon: Ha
           {/* Registration Button */}
           {showRegisterButton && isRegistrationOpen && (
             <Link
-              href={`/hackathon/${hackathon.hackCode}/register`}
+              href={`registerhack/${hackathon.hackCode}`}
               className="inline-flex items-center justify-center px-4 py-3 bg-[#008622] text-white font-semibold rounded-lg hover:bg-[#007020] transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg text-sm"
             >
               Register Now
@@ -433,7 +433,7 @@ export default function HomePage() {
                 </svg>
               </Link>
               <Link
-                href="/organize"
+                href="/createhack"
                 className="inline-flex items-center px-8 py-4 bg-white text-[#008622] font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 border-2 border-[#008622]"
               >
                 Organize Event
