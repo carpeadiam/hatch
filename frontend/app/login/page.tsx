@@ -1,6 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Instrument_Sans } from 'next/font/google';
+
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-instrument-sans',
+});
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -24,6 +31,14 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 const API_BASE_URL = 'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net';
+
+function AuthPage() {
+  return (
+    <div className={instrumentSans.className}>
+      <AuthPageContent />
+    </div>
+  );
+}
 
 function AuthPageContent() {
   const [email, setEmail] = useState('');
@@ -194,7 +209,7 @@ function AuthPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
+    <div className={`min-h-screen bg-white flex items-center justify-center px-4 py-8 ${instrumentSans.className}`}>
       <div className="w-full max-w-sm">
         {/* Logo Section */}
         <div className="flex flex-col items-center mb-8">
@@ -357,7 +372,7 @@ function AuthPageContent() {
 }
 
 // Export as dynamic component to prevent SSR
-export default dynamic(() => Promise.resolve(AuthPageContent), {
+export default dynamic(() => Promise.resolve(AuthPage), {
   ssr: false,
   loading: () => (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">

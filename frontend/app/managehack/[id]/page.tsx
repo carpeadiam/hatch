@@ -1,6 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Instrument_Sans } from 'next/font/google';
+
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-instrument-sans',
+});
 import { useParams } from 'next/navigation';
 
 const BASE_URL = "https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net";
@@ -91,6 +98,14 @@ interface HackathonData {
 type TabType = 'overview' | 'details' | 'phases' | 'admins' | 'judging' | 'leaderboard';
 
 export default function ManageHackPage() {
+  return (
+    <div className={instrumentSans.className}>
+      <ManageHackPageContent />
+    </div>
+  );
+}
+
+function ManageHackPageContent() {
   const params = useParams();
   const hackCode = params.id as string;
   

@@ -1,6 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Instrument_Sans } from 'next/font/google';
+
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-instrument-sans',
+});
 import { useParams } from 'next/navigation';
 
 interface Organiser {
@@ -70,6 +77,14 @@ interface ExistingSubmission {
 }
 
 export default function HackathonSubmissionPage() {
+  return (
+    <div className={instrumentSans.className}>
+      <HackathonSubmissionContent />
+    </div>
+  );
+}
+
+function HackathonSubmissionContent() {
   const params = useParams();
   const hackCode = params.id as string;
   

@@ -1,6 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Instrument_Sans } from 'next/font/google';
+
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-instrument-sans',
+});
 import { useParams } from 'next/navigation';
 import Link from "next/link";
 
@@ -488,6 +495,14 @@ function ActionButton({ data }: { data: HackathonData }) {
 }
 
 export default function HackathonPage() {
+  return (
+    <div className={instrumentSans.className}>
+      <HackathonPageContent />
+    </div>
+  );
+}
+
+function HackathonPageContent() {
   const params = useParams();
   const [hackData, setHackData] = useState<HackathonData | null>(null);
   const [loading, setLoading] = useState(true);

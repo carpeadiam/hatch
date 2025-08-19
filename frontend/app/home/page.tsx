@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Instrument_Sans } from 'next/font/google';
+
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-instrument-sans',
+});
 
 interface Organiser {
   email: string;
@@ -277,6 +284,14 @@ const HackathonCard = ({ hackathon, showRegisterButton = true }: { hackathon: Ha
 };
 
 export default function HomePage() {
+  return (
+    <div className={`${instrumentSans.className}`}>
+      <HomePageContent />
+    </div>
+  );
+}
+
+function HomePageContent() {
   const [hackathons, setHackathons] = useState<Hackathon[]>([]);
   const [filteredHackathons, setFilteredHackathons] = useState<Hackathon[]>([]);
   const [registeredHackathons, setRegisteredHackathons] = useState<Hackathon[]>([]);

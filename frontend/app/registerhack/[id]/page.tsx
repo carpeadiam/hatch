@@ -1,6 +1,13 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import { Instrument_Sans } from 'next/font/google';
+
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-instrument-sans',
+});
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -1284,8 +1291,9 @@ const RegistrationPageContent = () => {
 
 export default function RegistrationPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className={instrumentSans.className}>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8 bg-white rounded-xl shadow-lg border border-gray-200">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-600 mx-auto mb-6"></div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading Registration Form</h3>
@@ -1293,7 +1301,8 @@ export default function RegistrationPage() {
         </div>
       </div>
     }>
-      <RegistrationPageContent />
-    </Suspense>
+        <RegistrationPageContent />
+      </Suspense>
+    </div>
   );
 }

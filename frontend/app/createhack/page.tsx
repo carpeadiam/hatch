@@ -1,6 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Instrument_Sans } from 'next/font/google';
+
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-instrument-sans',
+});
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar, Users, Trophy, Building, Clock, FileText, ArrowLeft, ArrowRight, Loader2} from 'lucide-react';
 
@@ -86,6 +93,14 @@ const steps = [
 ];
 
 export default function CreateEventForm() {
+  return (
+    <div className={instrumentSans.className}>
+      <CreateEventFormContent />
+    </div>
+  );
+}
+
+function CreateEventFormContent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [submissionResult, setSubmissionResult] = useState<ApiResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
