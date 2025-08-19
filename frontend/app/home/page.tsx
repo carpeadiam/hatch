@@ -121,90 +121,125 @@ const HackathonCard = ({ hackathon, showRegisterButton = true }: { hackathon: Ha
   const isRegistrationOpen = calculateDaysLeft(hackathon.registrationEndDate) !== 'Registration Closed';
 
   return (
-    <Link
-      href={`/viewhack/${hackathon.hackCode}`}
-      className="block group"
-    >
-      <div className="bg-white rounded-2xl border border-gray-100 hover:border-[#008622]/20 hover:shadow-xl transition-all duration-300 overflow-hidden h-full">
-        {/* Header Image */}
-        <div className="relative h-40 bg-gradient-to-br from-[#008622] via-[#009d28] to-[#00b82e] overflow-hidden">
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="absolute top-4 right-4">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-              hackathon.mode === 'online' 
-                ? 'bg-blue-100 text-blue-700' 
-                : hackathon.mode === 'offline'
-                ? 'bg-orange-100 text-orange-700'
-                : 'bg-purple-100 text-purple-700'
-            }`}>
-              {hackathon.mode.charAt(0).toUpperCase() + hackathon.mode.slice(1)}
-            </span>
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-white text-center">
-              <div className="text-3xl mb-2">🚀</div>
-              <div className="text-sm font-medium opacity-90">Hackathon</div>
-            </div>
-          </div>
+    <div className="bg-white rounded-2xl border border-gray-100 hover:border-[#008622]/20 hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
+      {/* Header Image */}
+      <div className="relative h-40 bg-gradient-to-br from-[#008622] via-[#009d28] to-[#00b82e] overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute top-4 right-4">
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+            hackathon.mode === 'online' 
+              ? 'bg-blue-100 text-blue-700' 
+              : hackathon.mode === 'offline'
+              ? 'bg-orange-100 text-orange-700'
+              : 'bg-purple-100 text-purple-700'
+          }`}>
+            {hackathon.mode.charAt(0).toUpperCase() + hackathon.mode.slice(1)}
+          </span>
         </div>
-
-        {/* Content */}
-        <div className="p-6">
-          {/* Title and Tagline */}
-          <div className="mb-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#008622] transition-colors line-clamp-1">
-              {hackathon.eventName}
-            </h3>
-            <p className="text-gray-600 text-sm line-clamp-2">
-              {hackathon.eventTagline}
-            </p>
-          </div>
-
-          {/* Key Stats */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="text-center p-3 bg-gray-50 rounded-xl">
-              <div className="text-lg font-bold text-gray-900">{hackathon.teamSize}</div>
-              <div className="text-xs text-gray-500">Team Size</div>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-xl">
-              <div className="text-lg font-bold text-gray-900">{getRegistrationFee(hackathon)}</div>
-              <div className="text-xs text-gray-500">Registration</div>
-            </div>
-          </div>
-
-          {/* Prize Pool */}
-          <div className="mb-4 p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl border border-yellow-200">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-yellow-800">Prize Pool</span>
-              <span className="text-lg font-bold text-yellow-900">
-                {calculatePrizePool(hackathon.prizes)}
-              </span>
-            </div>
-          </div>
-
-          {/* Registration Status */}
-          <div className="mb-4 p-3 rounded-xl border-2 border-dashed border-gray-200">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Registration</span>
-              <span className={`text-sm font-semibold ${
-                isRegistrationOpen ? 'text-[#008622]' : 'text-red-500'
-              }`}>
-                {calculateDaysLeft(hackathon.registrationEndDate)}
-              </span>
-            </div>
-          </div>
-
-          {/* Event Dates */}
-          <div className="pt-4 border-t border-gray-100">
-            <div className="flex items-center justify-between text-sm text-gray-500">
-              <span>{new Date(hackathon.eventStartDate).toLocaleDateString()}</span>
-              <span>→</span>
-              <span>{new Date(hackathon.eventEndDate).toLocaleDateString()}</span>
-            </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-white text-center">
+            <div className="text-3xl mb-2">🚀</div>
+            <div className="text-sm font-medium opacity-90">Hackathon</div>
           </div>
         </div>
       </div>
-    </Link>
+
+      {/* Content */}
+      <div className="p-6 flex-1 flex flex-col">
+        {/* Title and Tagline */}
+        <div className="mb-4">
+          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
+            {hackathon.eventName}
+          </h3>
+          <p className="text-gray-600 text-sm line-clamp-2">
+            {hackathon.eventTagline}
+          </p>
+        </div>
+
+        {/* Key Stats */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="text-center p-3 bg-gray-50 rounded-xl">
+            <div className="text-lg font-bold text-gray-900">{hackathon.teamSize}</div>
+            <div className="text-xs text-gray-500">Team Size</div>
+          </div>
+          <div className="text-center p-3 bg-gray-50 rounded-xl">
+            <div className="text-lg font-bold text-gray-900">{getRegistrationFee(hackathon)}</div>
+            <div className="text-xs text-gray-500">Registration</div>
+          </div>
+        </div>
+
+        {/* Prize Pool */}
+        <div className="mb-4 p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl border border-yellow-200">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-yellow-800">Prize Pool</span>
+            <span className="text-lg font-bold text-yellow-900">
+              {calculatePrizePool(hackathon.prizes)}
+            </span>
+          </div>
+        </div>
+
+        {/* Registration Status */}
+        <div className="mb-4 p-3 rounded-xl border-2 border-dashed border-gray-200">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Registration</span>
+            <span className={`text-sm font-semibold ${
+              isRegistrationOpen ? 'text-[#008622]' : 'text-red-500'
+            }`}>
+              {calculateDaysLeft(hackathon.registrationEndDate)}
+            </span>
+          </div>
+        </div>
+
+        {/* Event Dates */}
+        <div className="pt-4 border-t border-gray-100 mb-4">
+          <div className="flex items-center justify-between text-sm text-gray-500">
+            <span>{new Date(hackathon.eventStartDate).toLocaleDateString()}</span>
+            <span>→</span>
+            <span>{new Date(hackathon.eventEndDate).toLocaleDateString()}</span>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-auto flex flex-col gap-3">
+          {/* View Details Button */}
+          <Link
+            href={`/viewhack/${hackathon.hackCode}`}
+            className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm"
+          >
+            View Details
+            <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
+
+          {/* Registration Button */}
+          {showRegisterButton && isRegistrationOpen && (
+            <Link
+              href={`/hackathon/${hackathon.hackCode}/register`}
+              className="inline-flex items-center justify-center px-4 py-3 bg-[#008622] text-white font-semibold rounded-lg hover:bg-[#007020] transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg text-sm"
+            >
+              Register Now
+              <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </Link>
+          )}
+
+          {/* Registration Closed Button */}
+          {showRegisterButton && !isRegistrationOpen && (
+            <button
+              disabled
+              className="inline-flex items-center justify-center px-4 py-3 bg-gray-300 text-gray-500 font-semibold rounded-lg cursor-not-allowed text-sm"
+            >
+              Registration Closed
+              <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -256,8 +291,11 @@ export default function HomePage() {
     }
 
     if (filters.hasFee) {
-      const isFree = filters.hasFee === 'free';
-      filtered = filtered.filter(hackathon => hackathon.hasFee !== isFree);
+      if (filters.hasFee === 'free') {
+        filtered = filtered.filter(hackathon => !hackathon.hasFee);
+      } else if (filters.hasFee === 'paid') {
+        filtered = filtered.filter(hackathon => hackathon.hasFee);
+      }
     }
 
     if (filters.teamSize) {
@@ -564,7 +602,7 @@ export default function HomePage() {
                       <select
                         value={filters.mode}
                         onChange={(e) => setFilters({...filters, mode: e.target.value})}
-                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#008622] focus:border-[#008622]"
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
                       >
                         <option value="">All Modes</option>
                         <option value="online">Online</option>
@@ -579,7 +617,7 @@ export default function HomePage() {
                       <select
                         value={filters.hasFee}
                         onChange={(e) => setFilters({...filters, hasFee: e.target.value})}
-                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#008622] focus:border-[#008622]"
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
                       >
                         <option value="">All Types</option>
                         <option value="free">Free</option>
@@ -593,7 +631,7 @@ export default function HomePage() {
                       <select
                         value={filters.teamSize}
                         onChange={(e) => setFilters({...filters, teamSize: e.target.value})}
-                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#008622] focus:border-[#008622]"
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
                       >
                         <option value="">Any Size</option>
                         <option value="1">Solo (1)</option>
@@ -611,7 +649,7 @@ export default function HomePage() {
                       <select
                         value={filters.eventType}
                         onChange={(e) => setFilters({...filters, eventType: e.target.value})}
-                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#008622] focus:border-[#008622]"
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
                       >
                         <option value="">All Types</option>
                         <option value="hackathon">Hackathon</option>
