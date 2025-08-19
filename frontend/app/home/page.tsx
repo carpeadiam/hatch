@@ -55,49 +55,34 @@ interface Hackathon {
   upiId?: string;
 }
 
-export default function HomePage() {
-  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const LoadingSkeleton = () => (
+  <div className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
+    <div className="h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-4"></div>
+    <div className="space-y-3">
+      <div className="h-6 bg-gray-200 rounded-lg w-3/4"></div>
+      <div className="h-4 bg-gray-200 rounded w-full"></div>
+      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+      <div className="flex justify-between mt-4">
+        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+      </div>
+    </div>
+  </div>
+);
 
-  useEffect(() => {
-    fetchHackathons();
-  }, []);
+const EmptyState = ({ title, message }: { title: string; message: string }) => (
+  <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+    </div>
+    <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+    <p className="text-gray-500">{message}</p>
+  </div>
+);
 
-  const fetchHackathons = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/allHacks'
-      );
-      if (!response.ok) {
-        throw new Error('Failed to fetch hackathons');
-      }
-      
-      const data = await response.json();
-      console.log(data);
-      // Filter hackathons to show only future events
-      const now = new Date();
-      
-      // Remove the filter for testing purposes to see all hackathons
-      const futureHackathons = data;
-      
-      // Or alternatively, fix the date comparison if you want to keep the filter:
-      // const futureHackathons = data.filter((hackathon: Hackathon) => {
-      //   // Parse the date properly to ensure correct comparison
-      //   const startDate = new Date(hackathon.eventStartDate);
-      //   return startDate > now;
-      // });
-      
-      console.log('Filtered hackathons:', futureHackathons.length);
-      setHackathons(futureHackathons);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+const HackathonCard = ({ hackathon, showRegisterButton = true }: { hackathon: Hackathon; showRegisterButton?: boolean }) => {
   const calculateDaysLeft = (registrationEndDate: string): string => {
     const now = new Date();
     const endDate = new Date(registrationEndDate);
@@ -115,7 +100,6 @@ export default function HomePage() {
     let total = 0;
     
     prizes.forEach(prize => {
-      // Extract numbers from the description
       const numbers = prize.description.match(/\d+/g);
       if (numbers) {
         numbers.forEach(num => {
@@ -134,26 +118,249 @@ export default function HomePage() {
     return 'Free';
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading hackathons...</p>
+  const isRegistrationOpen = calculateDaysLeft(hackathon.registrationEndDate) !== 'Registration Closed';
+
+  return (
+    <Link
+      href={`/hackathons/${hackathon.hackCode}`}
+      className="block group"
+    >
+      <div className="bg-white rounded-2xl border border-gray-100 hover:border-[#008622]/20 hover:shadow-xl transition-all duration-300 overflow-hidden h-full">
+        {/* Header Image */}
+        <div className="relative h-40 bg-gradient-to-br from-[#008622] via-[#009d28] to-[#00b82e] overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute top-4 right-4">
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+              hackathon.mode === 'online' 
+                ? 'bg-blue-100 text-blue-700' 
+                : hackathon.mode === 'offline'
+                ? 'bg-orange-100 text-orange-700'
+                : 'bg-purple-100 text-purple-700'
+            }`}>
+              {hackathon.mode.charAt(0).toUpperCase() + hackathon.mode.slice(1)}
+            </span>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-white text-center">
+              <div className="text-3xl mb-2">🚀</div>
+              <div className="text-sm font-medium opacity-90">Hackathon</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          {/* Title and Tagline */}
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#008622] transition-colors line-clamp-1">
+              {hackathon.eventName}
+            </h3>
+            <p className="text-gray-600 text-sm line-clamp-2">
+              {hackathon.eventTagline}
+            </p>
+          </div>
+
+          {/* Key Stats */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="text-center p-3 bg-gray-50 rounded-xl">
+              <div className="text-lg font-bold text-gray-900">{hackathon.teamSize}</div>
+              <div className="text-xs text-gray-500">Team Size</div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-xl">
+              <div className="text-lg font-bold text-gray-900">{getRegistrationFee(hackathon)}</div>
+              <div className="text-xs text-gray-500">Registration</div>
+            </div>
+          </div>
+
+          {/* Prize Pool */}
+          <div className="mb-4 p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl border border-yellow-200">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-yellow-800">Prize Pool</span>
+              <span className="text-lg font-bold text-yellow-900">
+                {calculatePrizePool(hackathon.prizes)}
+              </span>
+            </div>
+          </div>
+
+          {/* Registration Status */}
+          <div className="mb-4 p-3 rounded-xl border-2 border-dashed border-gray-200">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Registration</span>
+              <span className={`text-sm font-semibold ${
+                isRegistrationOpen ? 'text-[#008622]' : 'text-red-500'
+              }`}>
+                {calculateDaysLeft(hackathon.registrationEndDate)}
+              </span>
+            </div>
+          </div>
+
+          {/* Event Dates */}
+          <div className="pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-between text-sm text-gray-500">
+              <span>{new Date(hackathon.eventStartDate).toLocaleDateString()}</span>
+              <span>→</span>
+              <span>{new Date(hackathon.eventEndDate).toLocaleDateString()}</span>
+            </div>
+          </div>
         </div>
       </div>
-    );
-  }
+    </Link>
+  );
+};
 
-  if (error) {
+export default function HomePage() {
+  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
+  const [filteredHackathons, setFilteredHackathons] = useState<Hackathon[]>([]);
+  const [registeredHackathons, setRegisteredHackathons] = useState<Hackathon[]>([]);
+  const [organizedHackathons, setOrganizedHackathons] = useState<Hackathon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [registeredLoading, setRegisteredLoading] = useState(true);
+  const [organizedLoading, setOrganizedLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    mode: '',
+    hasFee: '',
+    teamSize: '',
+    eventType: ''
+  });
+
+  useEffect(() => {
+    fetchHackathons();
+    fetchRegisteredHackathons();
+    fetchOrganizedHackathons();
+  }, []);
+
+  useEffect(() => {
+    filterHackathons();
+  }, [hackathons, searchQuery, filters]);
+
+  const filterHackathons = () => {
+    let filtered = [...hackathons];
+
+    // Search by name, tagline, or description
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(hackathon =>
+        hackathon.eventName.toLowerCase().includes(query) ||
+        hackathon.eventTagline.toLowerCase().includes(query) ||
+        hackathon.eventDescription.toLowerCase().includes(query) ||
+        hackathon.organisers.some(org => org.name.toLowerCase().includes(query))
+      );
+    }
+
+    // Apply filters
+    if (filters.mode) {
+      filtered = filtered.filter(hackathon => hackathon.mode === filters.mode);
+    }
+
+    if (filters.hasFee) {
+      const isFree = filters.hasFee === 'free';
+      filtered = filtered.filter(hackathon => hackathon.hasFee !== isFree);
+    }
+
+    if (filters.teamSize) {
+      filtered = filtered.filter(hackathon => hackathon.teamSize === filters.teamSize);
+    }
+
+    if (filters.eventType) {
+      filtered = filtered.filter(hackathon => hackathon.eventType === filters.eventType);
+    }
+
+    setFilteredHackathons(filtered);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFilters({
+      mode: '',
+      hasFee: '',
+      teamSize: '',
+      eventType: ''
+    });
+  };
+
+  const getActiveFilterCount = () => {
+    return Object.values(filters).filter(value => value !== '').length;
+  };
+
+  const fetchHackathons = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/allHacks'
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch hackathons');
+      }
+      
+      const data = await response.json();
+      console.log(data);
+      const futureHackathons = data;
+      
+      console.log('Filtered hackathons:', futureHackathons.length);
+      setHackathons(futureHackathons);
+      setFilteredHackathons(futureHackathons);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRegisteredHackathons = async () => {
+    try {
+      setRegisteredLoading(true);
+      const response = await fetch(
+        'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/yourhacks'
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setRegisteredHackathons(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch registered hackathons:', err);
+    } finally {
+      setRegisteredLoading(false);
+    }
+  };
+
+  const fetchOrganizedHackathons = async () => {
+    try {
+      setOrganizedLoading(true);
+      const response = await fetch(
+        'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/yourorgs'
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setOrganizedHackathons(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch organized hackathons:', err);
+    } finally {
+      setOrganizedLoading(false);
+    }
+  };
+
+  if (loading && error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Error: {error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={fetchHackathons}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-[#008622] text-white font-medium rounded-xl hover:bg-[#007020] transition-colors duration-200"
           >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
             Try Again
           </button>
         </div>
@@ -162,135 +369,313 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Upcoming Hackathons
-          </h1>
-          <p className="text-xl text-gray-600">
-            Discover and participate in exciting hackathons
-          </p>
-        </div>
-
-        {/* Hackathons Grid */}
-        {hackathons.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No hackathons available at the moment.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {hackathons.map((hackathon) => (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#008622]/5 to-[#00b82e]/5"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+              Build. Compete.{' '}
+              <span className="bg-gradient-to-r from-[#008622] to-[#00b82e] bg-clip-text text-transparent">
+                Innovate.
+              </span>
+            </h1>
+            <p className="text-xl sm:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              Join the most exciting hackathons and turn your ideas into reality. Connect with innovators, learn new skills, and compete for amazing prizes.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                key={hackathon.hackCode}
-                href={`/hackathons/${hackathon.hackCode}`}
-                className="block group"
+                href="/hackathons"
+                className="inline-flex items-center px-8 py-4 bg-[#008622] text-white font-semibold rounded-xl hover:bg-[#007020] transition-all duration-200 transform hover:scale-105 shadow-lg"
               >
-                <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-                  {/* Placeholder Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <div className="text-2xl font-bold mb-1">🚀</div>
-                        <div className="text-sm opacity-90">Hackathon</div>
-                      </div>
-                    </div>
+                Explore Hackathons
+                <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+              <Link
+                href="/organize"
+                className="inline-flex items-center px-8 py-4 bg-white text-[#008622] font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 border-2 border-[#008622]"
+              >
+                Organize Event
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        {/* Your Registered Hackathons Section */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Your Registered Hackathons</h2>
+              <p className="text-gray-600 mt-2">Track your upcoming competitions and deadlines</p>
+            </div>
+            <Link
+              href="/dashboard/registered"
+              className="text-[#008622] hover:text-[#007020] font-medium flex items-center"
+            >
+              View All
+              <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {registeredLoading ? (
+              Array.from({ length: 3 }, (_, i) => <LoadingSkeleton key={i} />)
+            ) : registeredHackathons.length > 0 ? (
+              registeredHackathons.slice(0, 3).map((hackathon) => (
+                <HackathonCard key={hackathon.hackCode} hackathon={hackathon} showRegisterButton={false} />
+              ))
+            ) : (
+              <EmptyState
+                title="No Registered Hackathons"
+                message="You haven't registered for any hackathons yet. Explore available hackathons below!"
+              />
+            )}
+          </div>
+        </section>
+
+        {/* Your Organized Hackathons Section */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Your Organized Hackathons</h2>
+              <p className="text-gray-600 mt-2">Manage and monitor your events</p>
+            </div>
+            <Link
+              href="/dashboard/organized"
+              className="text-[#008622] hover:text-[#007020] font-medium flex items-center"
+            >
+              View All
+              <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {organizedLoading ? (
+              Array.from({ length: 3 }, (_, i) => <LoadingSkeleton key={i} />)
+            ) : organizedHackathons.length > 0 ? (
+              organizedHackathons.slice(0, 3).map((hackathon) => (
+                <HackathonCard key={hackathon.hackCode} hackathon={hackathon} showRegisterButton={false} />
+              ))
+            ) : (
+              <EmptyState
+                title="No Organized Hackathons"
+                message="You haven't organized any hackathons yet. Ready to create your first event?"
+              />
+            )}
+          </div>
+        </section>
+
+        {/* Upcoming Hackathons Section */}
+        <section>
+          <div className="flex flex-col mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Discover Hackathons</h2>
+                <p className="text-gray-600 mt-2">Find your next coding adventure</p>
+              </div>
+              <Link
+                href="/hackathons"
+                className="text-[#008622] hover:text-[#007020] font-medium flex items-center"
+              >
+                View All
+                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* Compact Search and Filter Section */}
+            <div className="mb-6">
+              <div className="flex flex-col sm:flex-row gap-3 items-center">
+                {/* Compact Search Bar */}
+                <div className="relative flex-1 w-full">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                   </div>
+                  <input
+                    type="text"
+                    placeholder="Search hackathons..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#008622] focus:border-[#008622] text-gray-900"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      <svg className="h-4 w-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                
+                {/* Compact Filter Button */}
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`inline-flex items-center px-3 py-2 border rounded-lg font-medium text-sm transition-colors ${
+                      showFilters 
+                        ? 'border-[#008622] bg-[#008622] text-white' 
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
+                    </svg>
+                    Filters
+                    {getActiveFilterCount() > 0 && (
+                      <span className="ml-2 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                        {getActiveFilterCount()}
+                      </span>
+                    )}
+                  </button>
+                  
+                  {(searchQuery || getActiveFilterCount() > 0) && (
+                    <button
+                      onClick={clearFilters}
+                      className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
 
-                  {/* Card Content */}
-                  <div className="p-6">
-                    {/* Title and Tagline */}
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {hackathon.eventName}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {hackathon.eventTagline}
-                    </p>
-
-                    {/* Event Details */}
-                    <div className="space-y-2 mb-4">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-500">Mode:</span>
-                        <span className="text-gray-900 capitalize font-medium">
-                          {hackathon.mode}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-500">Team Size:</span>
-                        <span className="text-gray-900 font-medium">
-                          {hackathon.teamSize} members
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-500">Registration Fee:</span>
-                        <span className="text-gray-900 font-medium">
-                          {getRegistrationFee(hackathon)}
-                        </span>
-                      </div>
+              {/* Compact Filters Panel */}
+              {showFilters && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {/* Mode Filter */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Mode</label>
+                      <select
+                        value={filters.mode}
+                        onChange={(e) => setFilters({...filters, mode: e.target.value})}
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#008622] focus:border-[#008622]"
+                      >
+                        <option value="">All Modes</option>
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                        <option value="hybrid">Hybrid</option>
+                      </select>
                     </div>
 
-                    {/* Registration Status */}
-                    <div className="mb-4">
-                      <div className="text-sm">
-                        <span className="text-gray-500">Registration: </span>
-                        <span className={`font-medium ${
-                          calculateDaysLeft(hackathon.registrationEndDate) === 'Registration Closed'
-                            ? 'text-red-600'
-                            : 'text-green-600'
-                        }`}>
-                          {calculateDaysLeft(hackathon.registrationEndDate)}
-                        </span>
-                      </div>
+                    {/* Fee Filter */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Registration</label>
+                      <select
+                        value={filters.hasFee}
+                        onChange={(e) => setFilters({...filters, hasFee: e.target.value})}
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#008622] focus:border-[#008622]"
+                      >
+                        <option value="">All Types</option>
+                        <option value="free">Free</option>
+                        <option value="paid">Paid</option>
+                      </select>
                     </div>
 
-                    {/* Prize Pool */}
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                      <div className="text-sm text-yellow-800">
-                        <span className="font-medium">Prize Pool: </span>
-                        <span className="font-bold">
-                          {calculatePrizePool(hackathon.prizes)}
-                        </span>
-                      </div>
+                    {/* Team Size Filter */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Team Size</label>
+                      <select
+                        value={filters.teamSize}
+                        onChange={(e) => setFilters({...filters, teamSize: e.target.value})}
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#008622] focus:border-[#008622]"
+                      >
+                        <option value="">Any Size</option>
+                        <option value="1">Solo (1)</option>
+                        <option value="2">Duo (2)</option>
+                        <option value="3">Team of 3</option>
+                        <option value="4">Team of 4</option>
+                        <option value="5">Team of 5</option>
+                        <option value="6">Team of 6+</option>
+                      </select>
                     </div>
 
-                    {/* Event Dates */}
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <div className="text-xs text-gray-500">
-                        {new Date(hackathon.eventStartDate).toLocaleDateString()} - {' '}
-                        {new Date(hackathon.eventEndDate).toLocaleDateString()}
-                      </div>
+                    {/* Event Type Filter */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Event Type</label>
+                      <select
+                        value={filters.eventType}
+                        onChange={(e) => setFilters({...filters, eventType: e.target.value})}
+                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-[#008622] focus:border-[#008622]"
+                      >
+                        <option value="">All Types</option>
+                        <option value="hackathon">Hackathon</option>
+                        <option value="competition">Competition</option>
+                        <option value="workshop">Workshop</option>
+                        <option value="bootcamp">Bootcamp</option>
+                      </select>
                     </div>
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
+              )}
 
-        {/* View All Button */}
-        <div className="text-center">
-          <Link
-            href="/hackathons"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          >
-            View All Hackathons
-            <svg 
-              className="ml-2 w-4 h-4" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M9 5l7 7-7 7" 
-              />
-            </svg>
-          </Link>
+              {/* Search Results Summary */}
+              {(searchQuery || getActiveFilterCount() > 0) && (
+                <div className="mt-2 text-xs text-gray-600">
+                  Showing {filteredHackathons.length} of {hackathons.length} hackathons
+                  {searchQuery && (
+                    <span> for "<span className="font-medium">{searchQuery}</span>"</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }, (_, i) => <LoadingSkeleton key={i} />)}
+            </div>
+          ) : (searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : hackathons).length === 0 ? (
+            <EmptyState
+              title="No Hackathons Available"
+              message="Check back soon for exciting new hackathons and competitions!"
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : hackathons).slice(0, 6).map((hackathon) => (
+                <HackathonCard key={hackathon.hackCode} hackathon={hackathon} />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Stats Section */}
+      <div className="bg-white border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-3xl font-bold text-[#008622] mb-2">500+</div>
+              <div className="text-gray-600">Active Hackathons</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-[#008622] mb-2">10K+</div>
+              <div className="text-gray-600">Participants</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-[#008622] mb-2">₹5Cr+</div>
+              <div className="text-gray-600">Prize Money</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-[#008622] mb-2">100+</div>
+              <div className="text-gray-600">Partner Companies</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
