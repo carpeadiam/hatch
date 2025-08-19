@@ -55,6 +55,7 @@ interface HackathonData {
 }
 
 interface TeamData {
+  team: any;
   teamId: string;
   teamName: string;
   members: Array<{
