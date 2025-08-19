@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from "next/link";
 
-
 interface Organiser {
   name: string;
   email: string;
@@ -57,6 +56,25 @@ interface HackathonStatus {
   message: string;
   canRegister: boolean;
   daysRemaining?: number;
+}
+
+interface TeamMember {
+  course: string;
+  email: string;
+  graduatingYear: string;
+  institute: string;
+  location: string;
+  name: string;
+  phone: string;
+  specialization: string;
+}
+
+interface TeamDetails {
+  paymentDetails: any;
+  teamId: string;
+  teamLeader: TeamMember;
+  teamMembers: TeamMember[];
+  teamName: string;
 }
 
 // Status calculation component
@@ -145,12 +163,169 @@ function HackathonStatusCard({ data }: { data: HackathonData }) {
   );
 }
 
+// Team Details Popup Component
+function TeamDetailsPopup({ 
+  teamDetails, 
+  userEmail, 
+  onClose, 
+  onLeaveTeam 
+}: { 
+  teamDetails: TeamDetails; 
+  userEmail: string;
+  onClose: () => void;
+  onLeaveTeam: () => void;
+}) {
+  const [isLeavingTeam, setIsLeavingTeam] = useState(false);
+
+  const handleLeaveTeam = async () => {
+    if (window.confirm('Are you sure you want to leave this team? This action cannot be undone.')) {
+      setIsLeavingTeam(true);
+      await onLeaveTeam();
+      setIsLeavingTeam(false);
+    }
+  };
+
+  const renderMemberCard = (member: TeamMember, isLeader: boolean = false) => {
+    const isCurrentUser = member.email === userEmail;
+    
+    return (
+      <div className={`${isLeader ? 'bg-blue-50' : 'bg-green-50'} rounded-lg p-4`}>
+        <div className="flex justify-between items-start mb-3">
+          <h4 className="font-medium text-gray-900">
+            {isLeader ? 'Team Leader' : `Member`}
+            {isCurrentUser && (
+              <span className="ml-2 px-2 py-1 bg-yellow-200 text-yellow-800 text-xs rounded-full">
+                You
+              </span>
+            )}
+          </h4>
+          {isCurrentUser && !isLeader && (
+            <button
+              onClick={handleLeaveTeam}
+              disabled={isLeavingTeam}
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white text-sm rounded-md transition-colors"
+            >
+              {isLeavingTeam ? 'Leaving...' : 'Leave Team'}
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <p className="text-sm text-gray-600">Name</p>
+            <p className="font-medium text-gray-900">{member.name}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Email</p>
+            <p className="font-medium text-gray-900">{member.email}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Phone</p>
+            <p className="font-medium text-gray-900">{member.phone}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Institute</p>
+            <p className="font-medium text-gray-900">{member.institute}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Course</p>
+            <p className="font-medium text-gray-900">{member.course}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Graduating Year</p>
+            <p className="font-medium text-gray-900">{member.graduatingYear}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Location</p>
+            <p className="font-medium text-gray-900">{member.location}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Specialization</p>
+            <p className="font-medium text-gray-900">{member.specialization}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 backdrop-blur-sm bg-white bg-opacity-10 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Team Details</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {/* Team Name and ID */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Team Information</h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-600">Team Name</p>
+                <p className="font-medium text-gray-900 text-xl">{teamDetails.teamName}</p>
+                <p className="text-sm text-gray-600 mt-2">Team ID</p>
+                <p className="font-mono text-sm text-gray-900">{teamDetails.teamId}</p>
+              </div>
+            </div>
+
+            {/* Team Leader */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Team Leader</h3>
+              {renderMemberCard(teamDetails.teamLeader, true)}
+            </div>
+
+            {/* Team Members */}
+            {teamDetails.teamMembers && teamDetails.teamMembers.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Team Members ({teamDetails.teamMembers.length})
+                </h3>
+                <div className="space-y-4">
+                  {teamDetails.teamMembers.map((member, index) => (
+                    <div key={index}>
+                      {renderMemberCard(member)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Action button component
 function ActionButton({ data }: { data: HackathonData }) {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [registrationStatus, setRegistrationStatus] = useState<'loading' | 'yes' | 'no' | 'error'>('loading');
+  const [teamDetails, setTeamDetails] = useState<TeamDetails | null>(null);
+  const [showTeamPopup, setShowTeamPopup] = useState(false);
+  const params = useParams();
+  const hackCode = params.id as string;
 
   useEffect(() => {
     const user = localStorage.getItem('user');
+    const token = localStorage.getItem('auth_token');
+    
     if (user) {
       try {
         const userData = JSON.parse(user);
@@ -159,39 +334,148 @@ function ActionButton({ data }: { data: HackathonData }) {
         console.error('Error parsing user data:', error);
       }
     }
+    
+    if (token) {
+      setAuthToken(token);
+    }
   }, []);
+
+  useEffect(() => {
+    const checkRegistrationStatus = async () => {
+      if (!userEmail || !authToken || !hackCode) return;
+
+      try {
+        const response = await fetch(
+          'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/getTeamDetails',
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${authToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              hackCode: hackCode,
+              email: userEmail
+            })
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setRegistrationStatus(data.registrationStatus);
+          if (data.registrationStatus === 'yes' && data.team) {
+            setTeamDetails(data.team);
+          }
+        } else {
+          setRegistrationStatus('no');
+        }
+      } catch (error) {
+        console.error('Error checking registration status:', error);
+        setRegistrationStatus('error');
+      }
+    };
+
+    checkRegistrationStatus();
+  }, [userEmail, authToken, hackCode]);
+
+  const handleLeaveTeam = async () => {
+    if (!userEmail || !authToken || !hackCode) return;
+
+    try {
+      const response = await fetch(
+        'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/leaveTeam',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            hackCode: hackCode,
+            email: userEmail
+          })
+        }
+      );
+
+      if (response.ok) {
+        // Reset states after successful leave
+        setRegistrationStatus('no');
+        setTeamDetails(null);
+        setShowTeamPopup(false);
+        alert('Successfully left the team!');
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to leave team: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error leaving team:', error);
+      alert('An error occurred while leaving the team. Please try again.');
+    }
+  };
 
   const isAdmin = userEmail && data.admins.includes(userEmail);
   const now = new Date();
   const regStart = new Date(data.registrationStartDate);
   const regEnd = new Date(data.registrationEndDate);
   const canRegister = now >= regStart && now <= regEnd;
-  const params = useParams();
-  const hackCode = params.id as string;
 
+  // Admin view
+  if (isAdmin) {
+    return (
+      <Link href={`/managehack/${hackCode}`}>
+        <button className="w-full bg-[#008622] hover:bg-[#006b1b] text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+          Manage Hackathon
+        </button>
+      </Link>
+    );
+  }
 
-if (isAdmin) {
-  return (
-    <Link href={`/managehack/${hackCode}`}>
-
-      <button className="w-full bg-[#008622] hover:bg-[#006b1b] text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
-        Manage Hackathon
+  // Loading state
+  if (registrationStatus === 'loading') {
+    return (
+      <button 
+        disabled 
+        className="w-full bg-gray-300 text-gray-500 font-semibold py-3 px-6 rounded-lg cursor-not-allowed"
+      >
+        Checking Status...
       </button>
-    </Link>
-  );
-}
+    );
+  }
 
-if (canRegister) {
-  return (
-    <Link href={`/registerhack/${hackCode}`}>
-      <button className="w-full bg-[#008622] hover:bg-[#006b1b] text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
-        Register Now
-      </button>
-    </Link>
-  );
-}
+  // Already registered - show team details
+  if (registrationStatus === 'yes' && teamDetails && userEmail) {
+    return (
+      <>
+        <button 
+          onClick={() => setShowTeamPopup(true)}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+        >
+          View Team Details
+        </button>
+        {showTeamPopup && (
+          <TeamDetailsPopup 
+            teamDetails={teamDetails} 
+            userEmail={userEmail}
+            onClose={() => setShowTeamPopup(false)}
+            onLeaveTeam={handleLeaveTeam}
+          />
+        )}
+      </>
+    );
+  }
 
+  // Can register
+  if (canRegister && registrationStatus === 'no') {
+    return (
+      <Link href={`/registerhack/${hackCode}`}>
+        <button className="w-full bg-[#008622] hover:bg-[#006b1b] text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+          Register Now
+        </button>
+      </Link>
+    );
+  }
 
+  // Registration closed
   return (
     <button 
       disabled 
