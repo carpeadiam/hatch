@@ -122,7 +122,7 @@ const HackathonCard = ({ hackathon, showRegisterButton = true }: { hackathon: Ha
 
   return (
     <Link
-      href={`/hackathons/${hackathon.hackCode}`}
+      href={`/viewhack/${hackathon.hackCode}`}
       className="block group"
     >
       <div className="bg-white rounded-2xl border border-gray-100 hover:border-[#008622]/20 hover:shadow-xl transition-all duration-300 overflow-hidden h-full">
