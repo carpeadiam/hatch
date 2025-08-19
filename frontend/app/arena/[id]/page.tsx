@@ -64,6 +64,10 @@ interface TeamData {
   }>;
 }
 
+interface ExistingSubmission {
+  [key: string]: any;
+}
+
 export default function HackathonSubmissionPage() {
   const params = useParams();
   const hackCode = params.id as string;
@@ -72,6 +76,7 @@ export default function HackathonSubmissionPage() {
   const [teamData, setTeamData] = useState<TeamData | null>(null);
   const [activePhase, setActivePhase] = useState<number>(0);
   const [submissions, setSubmissions] = useState<Record<string, string>>({});
+  const [existingSubmissions, setExistingSubmissions] = useState<ExistingSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +87,24 @@ export default function HackathonSubmissionPage() {
     fetchHackathonData();
     fetchTeamData();
   }, [hackCode]);
+
+  useEffect(() => {
+    if (teamData) {
+      fetchExistingSubmissions();
+    }
+  }, [teamData]);
+
+  useEffect(() => {
+    // Pre-fill submissions when existing submissions are loaded or active phase changes
+    if (existingSubmissions.length > 0 && hackathonData) {
+      const currentPhaseSubmission = existingSubmissions.find(sub => sub.phaseIndex === activePhase);
+      if (currentPhaseSubmission && currentPhaseSubmission.submissions) {
+        setSubmissions(currentPhaseSubmission.submissions);
+      } else {
+        setSubmissions({});
+      }
+    }
+  }, [existingSubmissions, activePhase, hackathonData]);
 
   const fetchHackathonData = async () => {
     try {
@@ -97,7 +120,7 @@ export default function HackathonSubmissionPage() {
 
   const fetchTeamData = async () => {
     try {
-        const userEmail = JSON.parse(localStorage.getItem('user') || '{}').email;
+      const userEmail = JSON.parse(localStorage.getItem('user') || '{}').email;
       const authToken = localStorage.getItem('auth_token');
       
       if (!userEmail || !authToken) {
@@ -130,6 +153,41 @@ export default function HackathonSubmissionPage() {
     }
   };
 
+  const fetchExistingSubmissions = async () => {
+    try {
+      if (!teamData) return;
+      
+      const authToken = localStorage.getItem('auth_token');
+      const response = await fetch(`${baseURI}/fetchsubmissions?teamId=${teamData.team.teamId}&hackCode=${hackCode}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log(`Fetching existing submissions:`);
+      console.log(response);
+      if (response.ok) {
+        const data = await response.json();
+        // Handle both array and object responses
+        if (Array.isArray(data)) {
+          setExistingSubmissions(data);
+        } else if (data && typeof data === 'object') {
+          setExistingSubmissions([data]);
+        } else {
+          setExistingSubmissions([]);
+        }
+      } else {
+        // Natural fallback for no submissions
+        setExistingSubmissions([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch existing submissions:', err);
+      // Natural fallback
+      setExistingSubmissions([]);
+    }
+  };
+
   const getPhaseStatus = (phase: Phase): 'upcoming' | 'active' | 'completed' => {
     const now = new Date();
     const startDate = new Date(phase.startDate);
@@ -138,6 +196,14 @@ export default function HackathonSubmissionPage() {
     if (now < startDate) return 'upcoming';
     if (now > endDate) return 'completed';
     return 'active';
+  };
+
+  const hasSubmissionForPhase = (phaseIndex: number): boolean => {
+    return existingSubmissions.some(sub => sub.phaseIndex === phaseIndex);
+  };
+
+  const getSubmissionForPhase = (phaseIndex: number): ExistingSubmission | null => {
+    return existingSubmissions.find(sub => sub.phaseIndex === phaseIndex) || null;
   };
 
   const handleSubmissionChange = (deliverableType: string, value: string) => {
@@ -153,8 +219,8 @@ export default function HackathonSubmissionPage() {
     setSubmitting(true);
     try {
       const authToken = localStorage.getItem('auth_token');
-      console.log('submissions:', submissions, "\nphaseIndex:", activePhase);
-      const response = await fetch(`${baseURI}/submission?teamId=${teamData.teamId}&hackCode=${hackCode}`, {
+      
+      const response = await fetch(`${baseURI}/submissions?teamId=${teamData.team.teamId}&hackCode=${hackCode}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -162,17 +228,17 @@ export default function HackathonSubmissionPage() {
         },
         body: JSON.stringify({
           submissions: submissions,
-          teamId: teamData.teamId,
+          teamId: teamData.team.teamId,
           hackCode: hackCode,
           phaseIndex: activePhase,
         }),
       });
 
-
       if (!response.ok) throw new Error('Failed to submit');
       
       alert('Submission successful!');
-      setSubmissions({});
+      // Refresh existing submissions after successful submit
+      fetchExistingSubmissions();
     } catch (err) {
       alert('Submission failed. Please try again.');
       console.error(err);
@@ -216,24 +282,24 @@ export default function HackathonSubmissionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gray-800 shadow-sm border-b border-gray-700">
+      <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white">{hackathonData.eventName}</h1>
-              <p className="text-lg text-gray-300 mt-1">{hackathonData.eventTagline}</p>
-              <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-400">
+              <h1 className="text-3xl font-bold text-gray-900">{hackathonData.eventName}</h1>
+              <p className="text-lg text-gray-700 mt-1">{hackathonData.eventTagline}</p>
+              <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-800">
                 <span>Mode: {hackathonData.mode}</span>
                 <span>Team Size: {hackathonData.teamSize}</span>
                 <span>Max Teams: {hackathonData.maxTeams}</span>
               </div>
             </div>
             {teamData && (
-              <div className="mt-4 md:mt-0 bg-blue-900 rounded-lg p-4 border border-blue-700">
-                <h3 className="font-semibold text-blue-100">Team: {teamData.teamName}</h3>
-                <p className="text-sm text-blue-200">Team ID: {teamData.teamId}</p>
+              <div className="mt-4 md:mt-0 bg-blue-50 rounded-lg p-4">
+                <h3 className="font-semibold text-blue-900">Team: {teamData.team.teamName}</h3>
+                <p className="text-sm text-blue-700">Team ID: {teamData.team.teamId}</p>
               </div>
             )}
           </div>
@@ -244,33 +310,33 @@ export default function HackathonSubmissionPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 text-white">Event Details</h3>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">Event Details</h3>
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="font-medium text-gray-200">Start:</span>
-                  <p className="text-gray-300">{formatDate(hackathonData.eventStartDate)}</p>
+                  <span className="font-medium text-gray-800">Start:</span>
+                  <p className="text-gray-700">{formatDate(hackathonData.eventStartDate)}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-200">End:</span>
-                  <p className="text-gray-300">{formatDate(hackathonData.eventEndDate)}</p>
+                  <span className="font-medium text-gray-800">End:</span>
+                  <p className="text-gray-700">{formatDate(hackathonData.eventEndDate)}</p>
                 </div>
                 {hackathonData.hasFee && (
                   <div>
-                    <span className="font-medium text-gray-200">Fee:</span>
-                    <p className="text-gray-300">₹{hackathonData.fee}</p>
+                    <span className="font-medium text-gray-800">Fee:</span>
+                    <p className="text-gray-700">₹{hackathonData.fee}</p>
                   </div>
                 )}
               </div>
 
               {hackathonData.prizes.length > 0 && (
                 <div className="mt-6">
-                  <h4 className="font-semibold mb-3 text-white">Prizes</h4>
+                  <h4 className="font-semibold mb-3 text-gray-900">Prizes</h4>
                   <div className="space-y-2">
                     {hackathonData.prizes.map((prize, index) => (
-                      <div key={index} className="bg-yellow-900 rounded p-3 border border-yellow-700">
-                        <div className="font-medium text-yellow-200">{prize.title}</div>
-                        <div className="text-sm text-yellow-300">{prize.description}</div>
+                      <div key={index} className="bg-yellow-50 rounded p-3">
+                        <div className="font-medium text-yellow-800">{prize.title}</div>
+                        <div className="text-sm text-yellow-700">{prize.description}</div>
                       </div>
                     ))}
                   </div>
@@ -279,10 +345,10 @@ export default function HackathonSubmissionPage() {
 
               {hackathonData.sponsors.length > 0 && (
                 <div className="mt-6">
-                  <h4 className="font-semibold mb-3 text-white">Sponsors</h4>
+                  <h4 className="font-semibold mb-3 text-gray-900">Sponsors</h4>
                   <div className="space-y-1">
                     {hackathonData.sponsors.map((sponsor, index) => (
-                      <div key={index} className="text-sm text-gray-300">{sponsor.name}</div>
+                      <div key={index} className="text-sm text-gray-700">{sponsor.name}</div>
                     ))}
                   </div>
                 </div>
@@ -293,12 +359,13 @@ export default function HackathonSubmissionPage() {
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Phase Tabs */}
-            <div className="bg-gray-800 rounded-lg shadow mb-6 border border-gray-700">
-              <div className="border-b border-gray-600">
+            <div className="bg-white rounded-lg shadow mb-6">
+              <div className="border-b border-gray-200">
                 <nav className="flex space-x-8 px-6" aria-label="Phases">
                   {hackathonData.phases.map((phase, index) => {
                     const status = getPhaseStatus(phase);
                     const isActive = activePhase === index;
+                    const hasSubmission = hasSubmissionForPhase(index);
                     
                     return (
                       <button
@@ -306,23 +373,30 @@ export default function HackathonSubmissionPage() {
                         onClick={() => setActivePhase(index)}
                         className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                           isActive
-                            ? 'border-blue-400 text-blue-400'
-                            : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-500'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300'
                         }`}
                       >
                         <div className="flex items-center space-x-2">
                           <span>{phase.name}</span>
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              status === 'completed'
-                                ? 'bg-green-900 text-green-200 border border-green-700'
-                                : status === 'active'
-                                ? 'bg-blue-900 text-blue-200 border border-blue-700'
-                                : 'bg-gray-700 text-gray-300 border border-gray-600'
-                            }`}
-                          >
-                            {status}
-                          </span>
+                          <div className="flex space-x-1">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                status === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : status === 'active'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}
+                            >
+                              {status}
+                            </span>
+                            {hasSubmission && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                ✓ Submitted
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </button>
                     );
@@ -342,6 +416,23 @@ export default function HackathonSubmissionPage() {
                         <span>End: {formatDate(phase.endDate)}</span>
                       </div>
                     </div>
+
+                    {/* Submission Status Indicator */}
+                    {hasSubmissionForPhase(index) && (
+                      <div className="mb-6 bg-emerald-900 border border-emerald-700 rounded-lg p-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">✓</span>
+                          </div>
+                          <p className="text-emerald-200 font-medium">
+                            Submission already made for this phase
+                          </p>
+                        </div>
+                        <p className="text-emerald-300 text-sm mt-1">
+                          You can update your submission below if the phase is still active.
+                        </p>
+                      </div>
+                    )}
 
                     {getPhaseStatus(phase) === 'active' && teamData ? (
                       <div className="space-y-6">
@@ -367,20 +458,31 @@ export default function HackathonSubmissionPage() {
                           disabled={submitting || Object.keys(submissions).length === 0}
                           className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {submitting ? 'Submitting...' : 'Submit Deliverables'}
+                          {submitting ? 'Submitting...' : hasSubmissionForPhase(index) ? 'Update Submission' : 'Submit Deliverables'}
                         </button>
                       </div>
                     ) : (
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold text-white">Required Deliverables</h3>
-                        {phase.deliverables.map((deliverable, deliverableIndex) => (
-                          <div key={deliverableIndex} className="bg-gray-700 rounded-lg p-4 border border-gray-600">
-                            <div className="font-medium text-gray-200">
-                              {deliverable.type.charAt(0).toUpperCase() + deliverable.type.slice(1)}
+                        {phase.deliverables.map((deliverable, deliverableIndex) => {
+                          const submissionData = getSubmissionForPhase(index);
+                          const submittedValue = submissionData?.submissions?.[deliverable.type];
+                          
+                          return (
+                            <div key={deliverableIndex} className="bg-gray-700 rounded-lg p-4 border border-gray-600">
+                              <div className="font-medium text-gray-200">
+                                {deliverable.type.charAt(0).toUpperCase() + deliverable.type.slice(1)}
+                              </div>
+                              <div className="text-sm text-gray-300 mt-1">{deliverable.description}</div>
+                              {submittedValue && (
+                                <div className="mt-3 p-3 bg-gray-600 rounded border-l-4 border-emerald-500">
+                                  <div className="text-xs text-emerald-400 font-medium mb-1">Your Submission:</div>
+                                  <div className="text-sm text-gray-200 break-all">{submittedValue}</div>
+                                </div>
+                              )}
                             </div>
-                            <div className="text-sm text-gray-300 mt-1">{deliverable.description}</div>
-                          </div>
-                        ))}
+                          );
+                        })}
                         
                         {getPhaseStatus(phase) === 'upcoming' && (
                           <div className="bg-yellow-900 border border-yellow-700 rounded-lg p-4">
