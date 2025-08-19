@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+
 
 // TypeScript interfaces
 interface Organizer {
@@ -82,7 +84,7 @@ const INDIAN_CITIES = [
   'Bhopal', 'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara'
 ];
 
-const RegistrationPage = () => {
+const RegistrationPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
     const hackCode = searchParams.get("hackCode");
@@ -905,4 +907,10 @@ const RegistrationPage = () => {
     );
 };
 
-export default RegistrationPage;
+export default function RegistrationPage() {
+  return (
+    <Suspense fallback={<div>Loading registration form...</div>}>
+      <RegistrationPageContent />
+    </Suspense>
+  );
+}
