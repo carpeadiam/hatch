@@ -56,7 +56,7 @@ interface HackathonData {
   upiId: string;
 }
 
-type TabType = 'overview' | 'details' | 'admins';
+type TabType = 'overview' | 'details' | 'phases' | 'admins';
 
 export default function ManageHackPage() {
   const params = useParams();
@@ -208,6 +208,58 @@ export default function ManageHackPage() {
     }));
   };
 
+  const addPhase = () => {
+    const newPhase: Phase = {
+      name: '',
+      description: '',
+      startDate: '',
+      endDate: '',
+      deliverables: []
+    };
+    
+    const updatedPhases = [...(editedData.phases || []), newPhase];
+    handleInputChange('phases', updatedPhases);
+  };
+
+  const updatePhase = (index: number, field: keyof Phase, value: any) => {
+    const updatedPhases = [...(editedData.phases || [])];
+    updatedPhases[index] = { ...updatedPhases[index], [field]: value };
+    handleInputChange('phases', updatedPhases);
+  };
+
+  const removePhase = (index: number) => {
+    if (confirm('Are you sure you want to remove this phase?')) {
+      const updatedPhases = editedData.phases?.filter((_, i) => i !== index) || [];
+      handleInputChange('phases', updatedPhases);
+    }
+  };
+
+  const addDeliverable = (phaseIndex: number) => {
+    const newDeliverable: Deliverable = {
+      description: '',
+      type: 'github'
+    };
+    
+    const updatedPhases = [...(editedData.phases || [])];
+    updatedPhases[phaseIndex].deliverables = [...updatedPhases[phaseIndex].deliverables, newDeliverable];
+    handleInputChange('phases', updatedPhases);
+  };
+
+  const updateDeliverable = (phaseIndex: number, deliverableIndex: number, field: keyof Deliverable, value: string) => {
+    const updatedPhases = [...(editedData.phases || [])];
+    updatedPhases[phaseIndex].deliverables[deliverableIndex] = {
+      ...updatedPhases[phaseIndex].deliverables[deliverableIndex],
+      [field]: value
+    };
+    handleInputChange('phases', updatedPhases);
+  };
+
+  const removeDeliverable = (phaseIndex: number, deliverableIndex: number) => {
+    const updatedPhases = [...(editedData.phases || [])];
+    updatedPhases[phaseIndex].deliverables = updatedPhases[phaseIndex].deliverables.filter((_, i) => i !== deliverableIndex);
+    handleInputChange('phases', updatedPhases);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -251,6 +303,7 @@ export default function ManageHackPage() {
             {[
               { id: 'overview', label: 'Overview' },
               { id: 'details', label: 'Details' },
+              { id: 'phases', label: 'Phases' },
               { id: 'admins', label: 'Admins' },
             ].map((tab) => (
               <button
@@ -477,6 +530,164 @@ export default function ManageHackPage() {
                 className="w-full border border-gray-300 rounded px-3 py-2"
               />
             </div>
+          </div>
+        )}
+
+        {activeTab === 'phases' && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold">Manage Phases</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={addPhase}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Add Phase
+                </button>
+                <button
+                  onClick={saveChanges}
+                  disabled={saving}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+
+            {editedData.phases && editedData.phases.length > 0 ? (
+              <div className="space-y-6">
+                {editedData.phases.map((phase, phaseIndex) => (
+                  <div key={phaseIndex} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-medium">Phase {phaseIndex + 1}</h3>
+                      <button
+                        onClick={() => removePhase(phaseIndex)}
+                        className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                      >
+                        Remove Phase
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Phase Name</label>
+                        <input
+                          type="text"
+                          value={phase.name}
+                          onChange={(e) => updatePhase(phaseIndex, 'name', e.target.value)}
+                          className="w-full border border-gray-300 rounded px-3 py-2"
+                          placeholder="e.g., Ideation Phase"
+                        />
+                      </div>
+
+                      <div className="md:col-span-1">
+                        <label className="block text-sm font-medium mb-1">Description</label>
+                        <textarea
+                          value={phase.description}
+                          onChange={(e) => updatePhase(phaseIndex, 'description', e.target.value)}
+                          rows={2}
+                          className="w-full border border-gray-300 rounded px-3 py-2"
+                          placeholder="Phase description"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Start Date</label>
+                        <input
+                          type="datetime-local"
+                          value={phase.startDate}
+                          onChange={(e) => updatePhase(phaseIndex, 'startDate', e.target.value)}
+                          className="w-full border border-gray-300 rounded px-3 py-2"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1">End Date</label>
+                        <input
+                          type="datetime-local"
+                          value={phase.endDate}
+                          onChange={(e) => updatePhase(phaseIndex, 'endDate', e.target.value)}
+                          className="w-full border border-gray-300 rounded px-3 py-2"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Deliverables Section */}
+                    <div className="mt-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-md font-medium">Deliverables</h4>
+                        <button
+                          onClick={() => addDeliverable(phaseIndex)}
+                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                        >
+                          Add Deliverable
+                        </button>
+                      </div>
+
+                      {phase.deliverables.length > 0 ? (
+                        <div className="space-y-2">
+                          {phase.deliverables.map((deliverable, deliverableIndex) => (
+                            <div key={deliverableIndex} className="bg-gray-50 p-3 rounded border">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                                <div>
+                                  <label className="block text-xs font-medium mb-1">Type</label>
+                                  <select
+                                    value={deliverable.type}
+                                    onChange={(e) => updateDeliverable(phaseIndex, deliverableIndex, 'type', e.target.value)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                                  >
+                                    <option value="github">GitHub</option>
+                                    <option value="canva">Canva</option>
+                                    <option value="mvp">MVP</option>
+                                    <option value="drive">Drive</option>
+                                    <option value="figma">Figma</option>
+                                    <option value="video">Video</option>
+                                    <option value="presentation">Presentation</option>
+                                    <option value="other">Other</option>
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium mb-1">Description</label>
+                                  <input
+                                    type="text"
+                                    value={deliverable.description}
+                                    onChange={(e) => updateDeliverable(phaseIndex, deliverableIndex, 'description', e.target.value)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                                    placeholder="Deliverable description"
+                                  />
+                                </div>
+
+                                <div className="flex justify-end">
+                                  <button
+                                    onClick={() => removeDeliverable(phaseIndex, deliverableIndex)}
+                                    className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-sm">No deliverables added yet</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">No phases defined yet</p>
+                <button
+                  onClick={addPhase}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Add First Phase
+                </button>
+              </div>
+            )}
           </div>
         )}
 
