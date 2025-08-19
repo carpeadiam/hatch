@@ -571,6 +571,10 @@ function ManageHackPageContent() {
     try {
       setEliminating(true);
       const token = getAuthToken();
+
+      console.log(hackCode);
+      console.log(phaseIndex);
+      console.log(cutoffScore);
       
       const response = await fetch(`${BASE_URL}/eliminate?hackCode=${encodeURIComponent(hackCode)}&phaseId=${phaseIndex}`, {
         method: 'POST',
