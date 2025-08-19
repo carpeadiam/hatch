@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from "next/link";
+
 
 interface Organiser {
   name: string;
@@ -164,22 +166,31 @@ function ActionButton({ data }: { data: HackathonData }) {
   const regStart = new Date(data.registrationStartDate);
   const regEnd = new Date(data.registrationEndDate);
   const canRegister = now >= regStart && now <= regEnd;
+  const params = useParams();
+  const hackCode = params.id as string;
 
-  if (isAdmin) {
-    return (
+
+if (isAdmin) {
+  return (
+    <Link href={`/managehack/${hackCode}`}>
+
       <button className="w-full bg-[#008622] hover:bg-[#006b1b] text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
         Manage Hackathon
       </button>
-    );
-  }
+    </Link>
+  );
+}
 
-  if (canRegister) {
-    return (
+if (canRegister) {
+  return (
+    <Link href={`/registerhack/${hackCode}`}>
       <button className="w-full bg-[#008622] hover:bg-[#006b1b] text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
         Register Now
       </button>
-    );
-  }
+    </Link>
+  );
+}
+
 
   return (
     <button 
