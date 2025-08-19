@@ -97,7 +97,7 @@ export default function HackathonSubmissionPage() {
 
   const fetchTeamData = async () => {
     try {
-      const userEmail = localStorage.getItem('user.email');
+        const userEmail = JSON.parse(localStorage.getItem('user') || '{}').email;
       const authToken = localStorage.getItem('auth_token');
       
       if (!userEmail || !authToken) {
