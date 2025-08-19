@@ -53,6 +53,7 @@ interface Hackathon {
   sponsors: Sponsor[];
   teamSize: string;
   upiId?: string;
+  imageUrl?: string;
 }
 
 const LoadingSkeleton = () => (
@@ -123,8 +124,46 @@ const HackathonCard = ({ hackathon, showRegisterButton = true }: { hackathon: Ha
   return (
     <div className="bg-white rounded-2xl border border-gray-100 hover:border-[#008622]/20 hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
       {/* Header Image */}
-      <div className="relative h-40 bg-gradient-to-br from-[#008622] via-[#009d28] to-[#00b82e] overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
+      <div className="relative h-40 overflow-hidden">
+        {hackathon.imageUrl ? (
+          <div className="relative w-full h-full">
+            <Image
+              src={hackathon.imageUrl}
+              alt={hackathon.eventName}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              unoptimized={hackathon.imageUrl.startsWith('http')}
+              onError={(e) => {
+                // Fallback to default if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = '';
+                target.parentElement!.innerHTML = `
+                  <div class="absolute inset-0 bg-gradient-to-br from-[#008622] via-[#009d28] to-[#00b82e]">
+                    <div class="absolute inset-0 bg-black/10"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <div class="text-white text-center">
+                        <div class="text-3xl mb-2">🚀</div>
+                        <div class="text-sm font-medium opacity-90">Hackathon</div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }}
+            />
+          </div>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#008622] via-[#009d28] to-[#00b82e]">
+            <div className="absolute inset-0 bg-black/10"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-white text-center">
+                <div className="text-3xl mb-2">🚀</div>
+                <div className="text-sm font-medium opacity-90">Hackathon</div>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="absolute top-4 right-4">
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
             hackathon.mode === 'online' 
@@ -135,12 +174,6 @@ const HackathonCard = ({ hackathon, showRegisterButton = true }: { hackathon: Ha
           }`}>
             {hackathon.mode.charAt(0).toUpperCase() + hackathon.mode.slice(1)}
           </span>
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white text-center">
-            <div className="text-3xl mb-2">🚀</div>
-            <div className="text-sm font-medium opacity-90">Hackathon</div>
-          </div>
         </div>
       </div>
 

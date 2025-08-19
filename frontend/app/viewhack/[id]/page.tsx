@@ -49,6 +49,7 @@ interface HackathonData {
   registrationStartDate: string;
   sponsors: Sponsor[];
   teamSize: string;
+  imageUrl?: string;
 }
 
 interface HackathonStatus {
@@ -561,6 +562,19 @@ export default function HackathonPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Banner Image */}
+        <div className="mb-6 rounded-xl overflow-hidden shadow-sm">
+          <img 
+            src={hackData.imageUrl || '/logo.svg'} 
+            alt={hackData.eventName}
+            className="w-full h-48 object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/logo.svg';
+            }}
+          />
+        </div>
+        
         {/* Header Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-6">
           <div className="flex items-start justify-between mb-6">
