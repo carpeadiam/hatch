@@ -115,7 +115,7 @@ export default function AdminAnnouncementsPage() {
     try {
       const authToken = localStorage.getItem('auth_token');
       
-      const response = await fetch(`${BASE_URL}/announcement`, {
+      const response = await fetch(`${BASE_URL}/announcements`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
