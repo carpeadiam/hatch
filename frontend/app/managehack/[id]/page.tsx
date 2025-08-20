@@ -363,15 +363,16 @@ function ManageHackPageContent() {
     setExpandedTeamIds(newExpanded);
   };
 
-  const handleScoreInputChange = (teamId: string, phaseId: string, value: string) => {
-    setScoreInputs(prev => ({
-      ...prev,
-      [teamId]: {
-        ...prev[teamId],
-        [phaseId]: value
-      }
-    }));
-  };
+const handleScoreInputChange = (teamId: string, phaseId: string, value: string) => {
+  console.log(`Setting score input for team ${teamId}, phase ${phaseId} to: ${value}`);
+  setScoreInputs(prev => ({
+    ...prev,
+    [teamId]: {
+      ...(prev[teamId] || {}), // Ensure we preserve existing phase inputs for this team
+      [phaseId]: value
+    }
+  }));
+};
 
   const handleSaveScore = async (teamId: string, phaseId: string, rawScore: string) => {
     const score = parseInt(rawScore, 10);
@@ -452,10 +453,12 @@ function ManageHackPageContent() {
     return scoreInputs[teamId]?.[phaseId] || '';
   };
 
-  const isScoreInputActive = (teamId: string, phaseId: string): boolean => {
-    const input = scoreInputs[teamId]?.[phaseId];
-    return input !== undefined && input !== '';
-  };
+const isScoreInputActive = (teamId: string, phaseId: string): boolean => {
+  const input = scoreInputs[teamId]?.[phaseId];
+  const isActive = input !== undefined && input !== '';
+  console.log(`Checking if score input active for team ${teamId}, phase ${phaseId}: ${isActive} (input: ${input})`);
+  return isActive;
+};
 
   // Helper function to calculate total score for a team
   const calculateTeamTotalScore = (team: Registration): number => {
