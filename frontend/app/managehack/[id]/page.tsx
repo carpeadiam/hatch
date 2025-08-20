@@ -95,7 +95,7 @@ interface HackathonData {
   registrations?: Registration[];
 }
 
-type TabType = 'overview' | 'details' | 'phases' | 'admins' | 'judging' | 'leaderboard' | 'announcements' | 'scoring';
+type TabType = 'overview' | 'details' | 'phases' | 'admins' | 'announcements' | 'scoring';
 
 export default function ManageHackPage() {
   return (
@@ -679,8 +679,6 @@ function ManageHackPageContent() {
               { id: 'details', label: 'Details' },
               { id: 'phases', label: 'Phases' },
               { id: 'admins', label: 'Admins' },
-              { id: 'judging', label: 'Judging' },
-              { id: 'leaderboard', label: 'Leaderboard' },
               { id: 'announcements', label: 'Announcements' },
               { id: 'scoring', label: 'Scoring & Evaluation' },
             ].map((tab) => (
@@ -1135,25 +1133,6 @@ function ManageHackPageContent() {
                   ⚠️ Cannot remove the last remaining admin
                 </p>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Continue with judging and leaderboard tabs with black styling */}
-        {activeTab === 'judging' && (
-          <div className="bg-gray-900 rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4 text-white">Judging</h2>
-            <div className="text-center py-8">
-              <p className="text-gray-400">Judging interface will be implemented here</p>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'leaderboard' && (
-          <div className="bg-gray-900 rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4 text-white">Leaderboard</h2>
-            <div className="text-center py-8">
-              <p className="text-gray-400">Leaderboard will be implemented here</p>
             </div>
           </div>
         )}

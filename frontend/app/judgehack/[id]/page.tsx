@@ -123,7 +123,12 @@ function ManageHackPageContent() {
   const [expandedTeamIds, setExpandedTeamIds] = useState<Set<string>>(new Set());
   const [scoreInputs, setScoreInputs] = useState<Record<string, Record<string, string>>>({});
   const [scoreSaving, setScoreSaving] = useState<Record<string, boolean>>({});
-  const [activeScoreModal, setActiveScoreModal] = useState<string | null>(null); // NEW: Track which modal is active
+  const [activeScoreModal, setActiveScoreModal] = useState<string | null>(null);
+
+  // Leaderboard state
+  const [activeLeaderboardPhase, setActiveLeaderboardPhase] = useState<string>('overall');
+  const [eliminationCount, setEliminationCount] = useState<string>('');
+  const [eliminating, setEliminating] = useState(false);
 
   // In-memory auth token storage (replace with your actual auth mechanism)
   const [authToken, setAuthToken] = useState<string>('');
@@ -229,7 +234,7 @@ function ManageHackPageContent() {
     setExpandedTeamIds(newExpanded);
   };
 
-  // UPDATED: Handle score input changes and modal state
+  // Handle score input changes and modal state
   const handleScoreInputChange = (teamId: string, phaseId: string, value: string) => {
     const modalKey = `${teamId}-${phaseId}`;
     setActiveScoreModal(modalKey);
@@ -242,7 +247,7 @@ function ManageHackPageContent() {
     }));
   };
 
-  // UPDATED: Close score modal
+  // Close score modal
   const closeScoreModal = () => {
     setActiveScoreModal(null);
     // Don't clear score inputs here to preserve values
@@ -328,7 +333,7 @@ function ManageHackPageContent() {
     return scoreInputs[teamId]?.[phaseId] || '';
   };
 
-  // UPDATED: Check if score modal is active for specific team/phase
+  // Check if score modal is active for specific team/phase
   const isScoreModalActive = (teamId: string, phaseId: string): boolean => {
     return activeScoreModal === `${teamId}-${phaseId}`;
   };
@@ -340,28 +345,6 @@ function ManageHackPageContent() {
       return total + (submission.score || 0);
     }, 0);
   };
-
-  // Helper function to get leaderboard data
-  const getLeaderboardData = () => {
-    if (!hackData?.registrations) return [];
-
-    return hackData.registrations
-      .map(team => ({
-        teamId: team.teamId,
-        teamName: team.teamName || team.teamId,
-        totalScore: calculateTeamTotalScore(team),
-        submissions: team.submissions || [],
-        memberCount: getTotalMembersCount(team)
-      }))
-      .sort((a, b) => b.totalScore - a.totalScore); // Descending order
-  };
-
-  // 1. Add new state variables after the existing state declarations
-  const [activeLeaderboardPhase, setActiveLeaderboardPhase] = useState<string>('overall');
-  const [eliminationCount, setEliminationCount] = useState<string>('');
-  const [eliminating, setEliminating] = useState(false);
-
-  // 2. Add new helper functions after the existing helper functions
 
   // Define unified interface for leaderboard data
   interface LeaderboardTeam {
@@ -481,6 +464,96 @@ function ManageHackPageContent() {
     }
   };
 
+  // Helper function to determine link type and render appropriate button/preview
+  const renderDeliverableLink = (type: string, value: string) => {
+    if (!value || typeof value !== 'string') return null;
+
+    const lowerType = type.toLowerCase();
+    const lowerValue = value.toLowerCase();
+
+    // Check for Canva links
+    if (lowerType === 'canva' || lowerValue.includes('canva.com')) {
+      return (
+        <div className="space-y-2">
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-800 text-sm bg-purple-50 px-2 py-1 rounded transition-colors"
+          >
+            🎨 Open Canva
+          </a>
+        </div>
+      );
+    }
+
+    // Check for Google Drive links
+    if (lowerType === 'drive' || lowerValue.includes('drive.google.com') || lowerValue.includes('docs.google.com')) {
+      // Extract file ID from Google Drive URL for embed
+      let embedUrl = value;
+      const fileIdMatch = value.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (fileIdMatch) {
+        const fileId = fileIdMatch[1];
+        embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+      }
+
+      return (
+        <div className="space-y-2">
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-2 py-1 rounded transition-colors"
+          >
+            📁 Open Drive
+          </a>
+        </div>
+      );
+    }
+
+    // Check for GitHub links
+    if (lowerType === 'github' || lowerValue.includes('github.com')) {
+      return (
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <a
+              href={value}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-gray-800 hover:text-gray-900 text-sm bg-gray-100 px-2 py-1 rounded transition-colors"
+            >
+              💻 Open GitHub
+            </a>
+            <a
+              href={`/runcheck?link=${encodeURIComponent(value)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 text-sm bg-red-50 px-2 py-1 rounded transition-colors"
+            >
+              🔍 Run Plagiarism Checker
+            </a>
+          </div>
+        </div>
+      );
+    }
+
+    // For all other links, just open in new tab
+    if (lowerType === 'figma' || lowerType === 'mvp' || lowerType === 'presentation' || lowerType === 'other' || lowerType === 'video' || value.startsWith('http')) {
+      return (
+        <a
+          href={value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-2 py-1 rounded transition-colors"
+        >
+          🔗 Open Link
+        </a>
+      );
+    }
+
+    return null;
+  };
+
   // Set a default auth token if needed (replace with your auth logic)
   useEffect(() => {
     // You might want to get the token from props, context, or some other source
@@ -494,7 +567,7 @@ function ManageHackPageContent() {
     }
   }, [hackCode]);
 
-  // NEW: Close modal when clicking outside or pressing escape
+  // Close modal when clicking outside or pressing escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (activeScoreModal && !(event.target as Element).closest('.score-modal')) {
@@ -578,7 +651,7 @@ function ManageHackPageContent() {
           </nav>
         </div>
 
-        {/* FIXED Score Modal Backdrop */}
+        {/* Score Modal Backdrop */}
         {activeScoreModal && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
@@ -661,7 +734,7 @@ function ManageHackPageContent() {
                                 </div>
                               </div>
 
-                              {/* FIXED Enhanced Score Section */}
+                              {/* Enhanced Score Section */}
                               <div className="flex items-center gap-4">
                                 <div className="text-right relative">
                                   {currentScore !== undefined ? (
@@ -715,7 +788,7 @@ function ManageHackPageContent() {
                                     </div>
                                   )}
 
-                                  {/* FIXED Score Input Modal */}
+                                  {/* Score Input Modal */}
                                   {isModalActive && (
                                     <div className="fixed inset-0 flex items-center justify-center z-50">
                                       <div className="score-modal bg-white border border-gray-300 rounded-lg shadow-xl p-6 w-80 max-w-sm mx-4">
@@ -828,20 +901,12 @@ function ManageHackPageContent() {
                                                 <span className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide">
                                                   {type}
                                                 </span>
-                                                {value && typeof value === 'string' && value.startsWith('http') && (
-                                                  <a
-                                                    href={value}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-2 py-1 rounded transition-colors"
-                                                  >
-                                                    🔗 Open Link
-                                                  </a>
-                                                )}
                                               </div>
-                                              <p className="text-sm text-gray-700 break-all bg-gray-50 p-2 rounded">
+                                              <p className="text-sm text-gray-700 break-all bg-gray-50 p-2 rounded mb-3">
                                                 {value}
                                               </p>
+                                              {/* Enhanced link rendering with previews */}
+                                              {renderDeliverableLink(type, value)}
                                             </div>
                                           </div>
                                         </div>
@@ -876,7 +941,6 @@ function ManageHackPageContent() {
             )}
           </div>
         )}
-
 
         {activeTab === 'leaderboard' && (
           <div className="bg-white rounded-lg shadow p-6">
