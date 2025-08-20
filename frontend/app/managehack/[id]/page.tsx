@@ -1412,159 +1412,298 @@ function ManageHackPageContent() {
         )}
 
 
-        {activeTab === 'leaderboard' && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4">Leaderboard</h2>
-            
-            {/* Phase tabs for leaderboard */}
-            <div className="border-b border-gray-200 mb-6">
-              <nav className="flex space-x-8">
-                <button
-                  onClick={() => setActiveLeaderboardPhase('overall')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeLeaderboardPhase === 'overall'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Overall
-                </button>
-                {hackData.phases && hackData.phases.map((phase) => (
-                  <button
-                    key={phase.name}
-                    onClick={() => setActiveLeaderboardPhase(phase.name)}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                      activeLeaderboardPhase === phase.name
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    {phase.name}
-                  </button>
-                ))}
-              </nav>
-            </div>
+{activeTab === 'judging' && (
+  <div className="bg-white rounded-lg shadow p-6">
+    <h2 className="text-2xl font-semibold mb-4">Judging</h2>
+    
+    {hackData.phases && hackData.phases.length > 0 ? (
+      <>
+        {/* Phase tabs */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="flex space-x-8">
+            {hackData.phases.map((phase) => (
+              <button
+                key={phase.name}
+                onClick={() => setActivePhaseId(phase.name)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activePhaseId === phase.name
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {phase.name}
+                <br />
+                <span className="text-xs text-gray-400">
+                  {formatDate(phase.startDate).split(',')[0]} - {formatDate(phase.endDate).split(',')[0]}
+                </span>
+              </button>
+            ))}
+          </nav>
+        </div>
 
-            {/* Elimination controls */}
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <h3 className="text-lg font-medium text-red-800 mb-2">Team Elimination</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-red-700 mb-1">
-                    Number of teams to eliminate from bottom
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="Enter number of teams"
-                    value={eliminationCount}
-                    onChange={(e) => setEliminationCount(e.target.value)}
-                    className="w-full border border-red-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-                  />
-                </div>
-                <button
-                  onClick={handleElimination}
-                  disabled={!eliminationCount || isNaN(parseInt(eliminationCount)) || parseInt(eliminationCount) <= 0 || eliminating}
-                  className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                >
-                  {eliminating ? 'Eliminating...' : 'Eliminate Teams'}
-                </button>
-              </div>
-              <p className="text-xs text-red-600 mt-1">
-                ⚠️ This action will permanently remove teams from the hackathon based on their {activeLeaderboardPhase === 'overall' ? 'total' : 'phase'} scores.
-              </p>
-            </div>
-
-            {/* Leaderboard content */}
-            {(() => {
-              const leaderboardData = activeLeaderboardPhase === 'overall' 
-                ? getOverallLeaderboardData() 
-                : getPhaseLeaderboardData(activeLeaderboardPhase);
+        {/* Teams table for active phase */}
+        {hackData.registrations && hackData.registrations.length > 0 ? (
+          <div className="space-y-4">
+            {hackData.registrations.map((team) => {
+              const submission = getTeamSubmission(team, activePhaseId);
+              const currentScore = getCurrentScore(team, activePhaseId);
+              const scoreInput = getScoreInput(team.teamId, activePhaseId);
+              const saveKey = `${team.teamId}-${activePhaseId}`;
+              const isSaving = scoreSaving[saveKey] || false;
+              const isExpanded = expandedTeamIds.has(team.teamId);
+              const hasSubmission = submission && submission.submissions && Object.keys(submission.submissions).length > 0;
+              const [showScoreInput, setShowScoreInput] = useState(false);
               
-              return leaderboardData.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium">
-                      {activeLeaderboardPhase === 'overall' ? 'Overall Rankings' : `${activeLeaderboardPhase} Rankings`}
-                    </h3>
-                    <span className="text-sm text-gray-500">
-                      {leaderboardData.length} team{leaderboardData.length !== 1 ? 's' : ''}
-                    </span>
+              return (
+                <div key={team.teamId} className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-lg text-gray-800">
+                            {team.teamName || team.teamId}
+                          </h3>
+                          <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm">
+                            {getTotalMembersCount(team)} member{getTotalMembersCount(team) !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          {/* Submission Status */}
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${hasSubmission ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className={`text-sm ${hasSubmission ? 'text-green-700' : 'text-red-700'}`}>
+                              {hasSubmission ? 'Submitted' : 'Not submitted'}
+                            </span>
+                            {submission?.submittedAt && (
+                              <span className="text-xs text-gray-500">
+                                on {formatDate(submission.submittedAt)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Enhanced Score Section */}
+                      <div className="flex items-center gap-4">
+                        <div className="text-right relative">
+                          {currentScore !== undefined ? (
+                            // Score is already given
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                              <div className="flex items-center gap-2">
+                                <div className="text-2xl font-bold text-green-700">
+                                  {currentScore}
+                                </div>
+                                <div className="text-green-600">/100</div>
+                              </div>
+                              <div className="text-xs text-green-600 mb-2">Scored</div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowScoreInput(true);
+                                  handleScoreInputChange(team.teamId, activePhaseId, currentScore.toString());
+                                }}
+                                className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors"
+                              >
+                                Edit Score
+                              </button>
+                            </div>
+                          ) : hasSubmission ? (
+                            // Has submission but no score
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                              <div className="text-sm font-medium text-orange-700 mb-2">
+                                Awaiting Score
+                              </div>
+                              <div className="text-xs text-orange-600 mb-2">
+                                Submitted
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowScoreInput(true);
+                                  handleScoreInputChange(team.teamId, activePhaseId, '');
+                                }}
+                                className="text-xs bg-orange-600 text-white px-2 py-1 rounded hover:bg-orange-700 transition-colors"
+                              >
+                                Add Score
+                              </button>
+                            </div>
+                          ) : (
+                            // No submission
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                              <div className="text-sm text-gray-600">
+                                No Submission
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Cannot score
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Score Input Modal */}
+                          {showScoreInput && (
+                            <div className="absolute z-50 top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 w-64">
+                              <div className="mb-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Enter Score (0-100)
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  step="1"
+                                  placeholder="Score"
+                                  value={scoreInput}
+                                  onChange={(e) => {
+                                    handleScoreInputChange(team.teamId, activePhaseId, e.target.value);
+                                  }}
+                                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  autoFocus
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSaveScore(team.teamId, activePhaseId, scoreInput);
+                                    setShowScoreInput(false);
+                                  }}
+                                  disabled={!scoreInput || isNaN(parseInt(scoreInput)) || parseInt(scoreInput) < 0 || parseInt(scoreInput) > 100 || isSaving}
+                                  className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {isSaving ? 'Saving...' : 'Save'}
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowScoreInput(false);
+                                    setScoreInputs(prev => ({
+                                      ...prev,
+                                      [team.teamId]: {
+                                        ...prev[team.teamId],
+                                        [activePhaseId]: ''
+                                      }
+                                    }));
+                                  }}
+                                  className="bg-gray-400 text-white px-3 py-2 rounded text-sm hover:bg-gray-500"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <button
+                          onClick={() => toggleTeamExpansion(team.teamId)}
+                          className="text-gray-400 hover:text-gray-600 p-2"
+                        >
+                          {isExpanded ? '▼' : '▶'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   
-                  {leaderboardData.map((team, index) => {
-                    return (
-                      <div
-                        key={team.teamId}
-                        className={`border rounded-lg p-4 ${
-                          index === 0 ? 'border-yellow-400 bg-gradient-to-r from-yellow-50 to-yellow-100' : 
-                          index === 1 ? 'border-gray-400 bg-gradient-to-r from-gray-50 to-gray-100' : 
-                          index === 2 ? 'border-orange-400 bg-gradient-to-r from-orange-50 to-orange-100' : 
-                          'border-gray-200 bg-white hover:bg-gray-50'
-                        } transition-colors`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className={`text-2xl font-bold ${
-                              index === 0 ? 'text-yellow-600' : 
-                              index === 1 ? 'text-gray-600' : 
-                              index === 2 ? 'text-orange-600' : 
-                              'text-gray-500'
-                            }`}>
-                              {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
-                            </div>
-                            <div>
-                              <h3 className="font-semibold text-lg">{team.teamName}</h3>
-                              <p className="text-sm text-gray-600">{team.memberCount} members</p>
-                            </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <div className="text-2xl font-bold text-blue-600">
-                              {team.score}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {activeLeaderboardPhase === 'overall' ? 'Total Score' : 'Phase Score'}
-                            </div>
+                  {/* Expanded content */}
+                  {isExpanded && (
+                    <div className="border-t border-gray-200 bg-gray-50">
+                      <div className="p-4">
+                        {/* Team members */}
+                        <div className="mb-6">
+                          <h4 className="font-medium text-sm mb-3 text-gray-800">Team Members:</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {/* Team Leader */}
+                            {team.teamLeader && (
+                              <div className="bg-gradient-to-r from-green-100 to-green-200 border border-green-300 text-green-800 px-3 py-2 rounded-lg text-sm">
+                                <div className="flex items-center gap-1">
+                                  <span className="font-medium">👑 {team.teamLeader.name || team.teamLeader.email || 'Team Leader'}</span>
+                                </div>
+                                {team.teamLeader.course && team.teamLeader.graduatingYear && (
+                                  <div className="text-xs text-green-700 mt-1">
+                                    {team.teamLeader.course} - {team.teamLeader.graduatingYear}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {/* Team Members */}
+                            {team.teamMembers && team.teamMembers.map((member, idx) => (
+                              <div key={idx} className="bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-300 text-blue-800 px-3 py-2 rounded-lg text-sm">
+                                <div className="font-medium">
+                                  {member.name || member.email || `Member ${idx + 1}`}
+                                </div>
+                                {member.course && member.graduatingYear && (
+                                  <div className="text-xs text-blue-700 mt-1">
+                                    {member.course} - {member.graduatingYear}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
                           </div>
                         </div>
                         
-                        {/* Phase-wise breakdown for overall tab */}
-                        {activeLeaderboardPhase === 'overall' && team.submissions && team.submissions.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-gray-200">
-                            <div className="flex flex-wrap gap-2">
-                              {team.submissions.map((submission: Submission, idx: number) => {
-                                const phaseName = hackData.phases[submission.phaseId]?.name || `Phase ${submission.phaseId + 1}`;
-                                return (
-                                  <span
-                                    key={idx}
-                                    className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
-                                  >
-                                    {phaseName}: {submission.score || 0}
-                                  </span>
-                                );
-                              })}
+                        {/* Deliverables */}
+                        <div>
+                          <h4 className="font-medium text-sm mb-3 text-gray-800">
+                            Deliverables for {activePhaseId}:
+                          </h4>
+                          {hasSubmission ? (
+                            <div className="space-y-3">
+                              {Object.entries(submission.submissions!).map(([type, value], idx) => (
+                                <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <span className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide">
+                                          {type}
+                                        </span>
+                                        {value && typeof value === 'string' && value.startsWith('http') && (
+                                          <a
+                                            href={value}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-2 py-1 rounded transition-colors"
+                                          >
+                                            🔗 Open Link
+                                          </a>
+                                        )}
+                                      </div>
+                                      <p className="text-sm text-gray-700 break-all bg-gray-50 p-2 rounded">
+                                        {value}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          </div>
-                        )}
+                          ) : (
+                            <div className="text-center py-8">
+                              <div className="text-gray-400 text-4xl mb-2">📋</div>
+                              <p className="text-gray-500 text-sm">No deliverables submitted for this phase</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">🏆</div>
-                  <p className="text-gray-500 text-lg">
-                    {activeLeaderboardPhase === 'overall' 
-                      ? 'No teams with scores yet' 
-                      : `No teams have submitted for ${activeLeaderboardPhase} yet`
-                    }
-                  </p>
+                    </div>
+                  )}
                 </div>
               );
-            })()}
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">👥</div>
+            <p className="text-gray-500 text-lg">No teams registered yet</p>
           </div>
         )}
+      </>
+    ) : (
+      <div className="text-center py-12">
+        <div className="text-gray-400 text-6xl mb-4">📊</div>
+        <p className="text-gray-500 text-lg">No phases defined yet. Please add phases first.</p>
+      </div>
+    )}
+  </div>
+)}
       </div>
     </div>
   );
