@@ -3,13 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Instrument_Sans } from 'next/font/google';
-
-const instrumentSans = Instrument_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-instrument-sans',
-});
 
 interface Organiser {
   email: string;
@@ -39,6 +32,31 @@ interface Sponsor {
   name: string;
 }
 
+interface TeamMember {
+  course: string;
+  email: string;
+  graduatingYear: string;
+  institute: string;
+  location: string;
+  name: string;
+  phone: string;
+  specialization: string;
+}
+
+interface Registration {
+  paymentDetails: Record<string, any>;
+  teamId: string;
+  teamLeader: TeamMember;
+  teamMembers: TeamMember[];
+  teamName: string;
+  status?: string;
+  submissions?: Array<{
+    phaseId: number;
+    score?: number;
+    submissions: Record<string, string>;
+  }>;
+}
+
 interface Hackathon {
   admins: string[];
   eventDescription: string;
@@ -61,6 +79,15 @@ interface Hackathon {
   teamSize: string;
   upiId?: string;
   imageUrl?: string;
+  registrations?: Registration[];
+  announcements?: Array<{
+    content: string;
+    createdAt: string;
+    createdBy: string | null;
+    expiryDate: string;
+    id: string;
+    title: string;
+  }>;
 }
 
 const LoadingSkeleton = () => (
@@ -284,24 +311,15 @@ const HackathonCard = ({ hackathon, showRegisterButton = true }: { hackathon: Ha
 };
 
 export default function HomePage() {
-  return (
-    <div className={`${instrumentSans.className}`}>
-      <HomePageContent />
-    </div>
-  );
-}
-
-function HomePageContent() {
-  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
+  const [allHackathons, setAllHackathons] = useState<Hackathon[]>([]);
   const [filteredHackathons, setFilteredHackathons] = useState<Hackathon[]>([]);
   const [registeredHackathons, setRegisteredHackathons] = useState<Hackathon[]>([]);
   const [organizedHackathons, setOrganizedHackathons] = useState<Hackathon[]>([]);
   const [loading, setLoading] = useState(true);
-  const [registeredLoading, setRegisteredLoading] = useState(true);
-  const [organizedLoading, setOrganizedLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('');
   const [filters, setFilters] = useState({
     mode: '',
     hasFee: '',
@@ -309,18 +327,72 @@ function HomePageContent() {
     eventType: ''
   });
 
+  // Get user email from localStorage
   useEffect(() => {
-    fetchHackathons();
-    fetchRegisteredHackathons();
-    fetchOrganizedHackathons();
+    try {
+      const userString = localStorage.getItem('user');
+      if (userString) {
+        const user = JSON.parse(userString);
+        if (user && user.email) {
+          setUserEmail(user.email);
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+    }
   }, []);
 
   useEffect(() => {
+    fetchHackathons();
+  }, []);
+
+  useEffect(() => {
+    if (allHackathons.length > 0 && userEmail) {
+      categorizeHackathons();
+    }
     filterHackathons();
-  }, [hackathons, searchQuery, filters]);
+  }, [allHackathons, searchQuery, filters, userEmail]);
+
+  // Function to check if user is registered in a hackathon
+  const isUserRegistered = (hackathon: Hackathon, email: string): boolean => {
+    if (!hackathon.registrations || !email) return false;
+    
+    return hackathon.registrations.some(registration => {
+      // Check team leader
+      if (registration.teamLeader.email === email) return true;
+      
+      // Check team members
+      return registration.teamMembers.some(member => member.email === email);
+    });
+  };
+
+  // Function to check if user is an admin/organizer
+  const isUserOrganizer = (hackathon: Hackathon, email: string): boolean => {
+    if (!email) return false;
+    return hackathon.admins.includes(email);
+  };
+
+  // Categorize hackathons based on user relationship
+  const categorizeHackathons = () => {
+    if (!userEmail) return;
+
+    const registered: Hackathon[] = [];
+    const organized: Hackathon[] = [];
+
+    allHackathons.forEach(hackathon => {
+      if (isUserOrganizer(hackathon, userEmail)) {
+        organized.push(hackathon);
+      } else if (isUserRegistered(hackathon, userEmail)) {
+        registered.push(hackathon);
+      }
+    });
+
+    setRegisteredHackathons(registered);
+    setOrganizedHackathons(organized);
+  };
 
   const filterHackathons = () => {
-    let filtered = [...hackathons];
+    let filtered = [...allHackathons];
 
     // Search by name, tagline, or description
     if (searchQuery.trim()) {
@@ -382,50 +454,13 @@ function HomePageContent() {
       }
       
       const data = await response.json();
-      console.log(data);
-      const futureHackathons = data;
-      
-      console.log('Filtered hackathons:', futureHackathons.length);
-      setHackathons(futureHackathons);
-      setFilteredHackathons(futureHackathons);
+      console.log('Fetched hackathons:', data);
+      setAllHackathons(data);
+      setFilteredHackathons(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchRegisteredHackathons = async () => {
-    try {
-      setRegisteredLoading(true);
-      const response = await fetch(
-        'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/yourhacks'
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setRegisteredHackathons(data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch registered hackathons:', err);
-    } finally {
-      setRegisteredLoading(false);
-    }
-  };
-
-  const fetchOrganizedHackathons = async () => {
-    try {
-      setOrganizedLoading(true);
-      const response = await fetch(
-        'https://hatchplatform-dcdphngyewcwcuc4.centralindia-01.azurewebsites.net/yourorgs'
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setOrganizedHackathons(data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch organized hackathons:', err);
-    } finally {
-      setOrganizedLoading(false);
     }
   };
 
@@ -511,7 +546,7 @@ function HomePageContent() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {registeredLoading ? (
+            {loading ? (
               Array.from({ length: 3 }, (_, i) => <LoadingSkeleton key={i} />)
             ) : registeredHackathons.length > 0 ? (
               registeredHackathons.slice(0, 3).map((hackathon) => (
@@ -545,7 +580,7 @@ function HomePageContent() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {organizedLoading ? (
+            {loading ? (
               Array.from({ length: 3 }, (_, i) => <LoadingSkeleton key={i} />)
             ) : organizedHackathons.length > 0 ? (
               organizedHackathons.slice(0, 3).map((hackathon) => (
@@ -560,7 +595,7 @@ function HomePageContent() {
           </div>
         </section>
 
-        {/* Upcoming Hackathons Section */}
+        {/* Discover Hackathons Section */}
         <section>
           <div className="flex flex-col mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -713,7 +748,7 @@ function HomePageContent() {
               {/* Search Results Summary */}
               {(searchQuery || getActiveFilterCount() > 0) && (
                 <div className="mt-2 text-xs text-gray-600">
-                  Showing {filteredHackathons.length} of {hackathons.length} hackathons
+                  Showing {filteredHackathons.length} of {allHackathons.length} hackathons
                   {searchQuery && (
                     <span> for "<span className="font-medium">{searchQuery}</span>"</span>
                   )}
@@ -726,14 +761,14 @@ function HomePageContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }, (_, i) => <LoadingSkeleton key={i} />)}
             </div>
-          ) : (searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : hackathons).length === 0 ? (
+          ) : (searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : allHackathons).length === 0 ? (
             <EmptyState
               title="No Hackathons Available"
               message="Check back soon for exciting new hackathons and competitions!"
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : hackathons).slice(0, 6).map((hackathon) => (
+              {(searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : allHackathons).slice(0, 6).map((hackathon) => (
                 <HackathonCard key={hackathon.hackCode} hackathon={hackathon} />
               ))}
             </div>
