@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Navbar from '../../components/navbar';
 
 interface Organiser {
   email: string;
@@ -466,145 +467,81 @@ export default function HomePage() {
 
   if (loading && error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-8">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto p-8">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={fetchHackathons}
+              className="inline-flex items-center px-6 py-3 bg-[#008622] text-white font-medium rounded-xl hover:bg-[#007020] transition-colors duration-200"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Try Again
+            </button>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <button
-            onClick={fetchHackathons}
-            className="inline-flex items-center px-6 py-3 bg-[#008622] text-white font-medium rounded-xl hover:bg-[#007020] transition-colors duration-200"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Try Again
-          </button>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#008622]/5 to-[#00b82e]/5"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          <div className="text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Build. Compete.{' '}
-              <span className="bg-gradient-to-r from-[#008622] to-[#00b82e] bg-clip-text text-transparent">
-                Innovate.
-              </span>
-            </h1>
-            <p className="text-xl sm:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Join the most exciting hackathons and turn your ideas into reality. Connect with innovators, learn new skills, and compete for amazing prizes.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/hackathons"
-                className="inline-flex items-center px-8 py-4 bg-[#008622] text-white font-semibold rounded-xl hover:bg-[#007020] transition-all duration-200 transform hover:scale-105 shadow-lg"
-              >
-                Explore Hackathons
-                <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
-              <Link
-                href="/createhack"
-                className="inline-flex items-center px-8 py-4 bg-white text-[#008622] font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 border-2 border-[#008622]"
-              >
-                Organize Event
-              </Link>
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#008622]/5 to-[#00b82e]/5"></div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+            <div className="text-center">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+                Build. Compete.{' '}
+                <span className="bg-gradient-to-r from-[#008622] to-[#00b82e] bg-clip-text text-transparent">
+                  Innovate.
+                </span>
+              </h1>
+              <p className="text-xl sm:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Join the most exciting hackathons and turn your ideas into reality. Connect with innovators, learn new skills, and compete for amazing prizes.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/hackathons"
+                  className="inline-flex items-center px-8 py-4 bg-[#008622] text-white font-semibold rounded-xl hover:bg-[#007020] transition-all duration-200 transform hover:scale-105 shadow-lg"
+                >
+                  Explore Hackathons
+                  <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/createhack"
+                  className="inline-flex items-center px-8 py-4 bg-white text-[#008622] font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 border-2 border-[#008622]"
+                >
+                  Organize Event
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        {/* Your Registered Hackathons Section */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">Your Registered Hackathons</h2>
-              <p className="text-gray-600 mt-2">Track your upcoming competitions and deadlines</p>
-            </div>
-            <Link
-              href="/dashboard/registered"
-              className="text-[#008622] hover:text-[#007020] font-medium flex items-center"
-            >
-              View All
-              <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              Array.from({ length: 3 }, (_, i) => <LoadingSkeleton key={i} />)
-            ) : registeredHackathons.length > 0 ? (
-              registeredHackathons.slice(0, 3).map((hackathon) => (
-                <HackathonCard key={hackathon.hackCode} hackathon={hackathon} showRegisterButton={false} />
-              ))
-            ) : (
-              <EmptyState
-                title="No Registered Hackathons"
-                message="You haven't registered for any hackathons yet. Explore available hackathons below!"
-              />
-            )}
-          </div>
-        </section>
-
-        {/* Your Organized Hackathons Section */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">Your Organized Hackathons</h2>
-              <p className="text-gray-600 mt-2">Manage and monitor your events</p>
-            </div>
-            <Link
-              href="/dashboard/organized"
-              className="text-[#008622] hover:text-[#007020] font-medium flex items-center"
-            >
-              View All
-              <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              Array.from({ length: 3 }, (_, i) => <LoadingSkeleton key={i} />)
-            ) : organizedHackathons.length > 0 ? (
-              organizedHackathons.slice(0, 3).map((hackathon) => (
-                <HackathonCard key={hackathon.hackCode} hackathon={hackathon} showRegisterButton={false} />
-              ))
-            ) : (
-              <EmptyState
-                title="No Organized Hackathons"
-                message="You haven't organized any hackathons yet. Ready to create your first event?"
-              />
-            )}
-          </div>
-        </section>
-
-        {/* Discover Hackathons Section */}
-        <section>
-          <div className="flex flex-col mb-8">
-            <div className="flex items-center justify-between mb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          {/* Your Registered Hackathons Section */}
+          <section className="mb-16">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">Discover Hackathons</h2>
-                <p className="text-gray-600 mt-2">Find your next coding adventure</p>
+                <h2 className="text-3xl font-bold text-gray-900">Your Registered Hackathons</h2>
+                <p className="text-gray-600 mt-2">Track your upcoming competitions and deadlines</p>
               </div>
               <Link
-                href="/hackathons"
+                href="/dashboard/registered"
                 className="text-[#008622] hover:text-[#007020] font-medium flex items-center"
               >
                 View All
@@ -614,191 +551,261 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Compact Search and Filter Section */}
-            <div className="mb-6">
-              <div className="flex flex-col sm:flex-row gap-3 items-center">
-                {/* Compact Search Bar */}
-                <div className="relative flex-1 w-full">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search hackathons..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#008622] focus:border-[#008622] text-gray-900"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    >
-                      <svg className="h-4 w-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loading ? (
+                Array.from({ length: 3 }, (_, i) => <LoadingSkeleton key={i} />)
+              ) : registeredHackathons.length > 0 ? (
+                registeredHackathons.slice(0, 3).map((hackathon) => (
+                  <HackathonCard key={hackathon.hackCode} hackathon={hackathon} showRegisterButton={false} />
+                ))
+              ) : (
+                <EmptyState
+                  title="No Registered Hackathons"
+                  message="You haven't registered for any hackathons yet. Explore available hackathons below!"
+                />
+              )}
+            </div>
+          </section>
+
+          {/* Your Organized Hackathons Section */}
+          <section className="mb-16">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Your Organized Hackathons</h2>
+                <p className="text-gray-600 mt-2">Manage and monitor your events</p>
+              </div>
+              <Link
+                href="/dashboard/organized"
+                className="text-[#008622] hover:text-[#007020] font-medium flex items-center"
+              >
+                View All
+                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loading ? (
+                Array.from({ length: 3 }, (_, i) => <LoadingSkeleton key={i} />)
+              ) : organizedHackathons.length > 0 ? (
+                organizedHackathons.slice(0, 3).map((hackathon) => (
+                  <HackathonCard key={hackathon.hackCode} hackathon={hackathon} showRegisterButton={false} />
+                ))
+              ) : (
+                <EmptyState
+                  title="No Organized Hackathons"
+                  message="You haven't organized any hackathons yet. Ready to create your first event?"
+                />
+              )}
+            </div>
+          </section>
+
+          {/* Discover Hackathons Section */}
+          <section>
+            <div className="flex flex-col mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">Discover Hackathons</h2>
+                  <p className="text-gray-600 mt-2">Find your next coding adventure</p>
                 </div>
-                
-                {/* Compact Filter Button */}
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`inline-flex items-center px-3 py-2 border rounded-lg font-medium text-sm transition-colors ${
-                      showFilters 
-                        ? 'border-[#008622] bg-[#008622] text-white' 
-                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
-                    </svg>
-                    Filters
-                    {getActiveFilterCount() > 0 && (
-                      <span className="ml-2 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
-                        {getActiveFilterCount()}
-                      </span>
-                    )}
-                  </button>
-                  
-                  {(searchQuery || getActiveFilterCount() > 0) && (
-                    <button
-                      onClick={clearFilters}
-                      className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
+                <Link
+                  href="/hackathons"
+                  className="text-[#008622] hover:text-[#007020] font-medium flex items-center"
+                >
+                  View All
+                  <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
               </div>
 
-              {/* Compact Filters Panel */}
-              {showFilters && (
-                <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {/* Mode Filter */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Mode</label>
-                      <select
-                        value={filters.mode}
-                        onChange={(e) => setFilters({...filters, mode: e.target.value})}
-                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
-                      >
-                        <option value="">All Modes</option>
-                        <option value="online">Online</option>
-                        <option value="offline">Offline</option>
-                        <option value="hybrid">Hybrid</option>
-                      </select>
+              {/* Compact Search and Filter Section */}
+              <div className="mb-6">
+                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                  {/* Compact Search Bar */}
+                  <div className="relative flex-1 w-full">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
                     </div>
-
-                    {/* Fee Filter */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Registration</label>
-                      <select
-                        value={filters.hasFee}
-                        onChange={(e) => setFilters({...filters, hasFee: e.target.value})}
-                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
+                    <input
+                      type="text"
+                      placeholder="Search hackathons..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-[#008622] focus:border-[#008622] text-gray-900"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       >
-                        <option value="">All Types</option>
-                        <option value="free">Free</option>
-                        <option value="paid">Paid</option>
-                      </select>
-                    </div>
-
-                    {/* Team Size Filter */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Team Size</label>
-                      <select
-                        value={filters.teamSize}
-                        onChange={(e) => setFilters({...filters, teamSize: e.target.value})}
-                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
+                        <svg className="h-4 w-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Compact Filter Button */}
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => setShowFilters(!showFilters)}
+                      className={`inline-flex items-center px-3 py-2 border rounded-lg font-medium text-sm transition-colors ${
+                        showFilters 
+                          ? 'border-[#008622] bg-[#008622] text-white' 
+                          : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
+                      </svg>
+                      Filters
+                      {getActiveFilterCount() > 0 && (
+                        <span className="ml-2 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                          {getActiveFilterCount()}
+                        </span>
+                      )}
+                    </button>
+                    
+                    {(searchQuery || getActiveFilterCount() > 0) && (
+                      <button
+                        onClick={clearFilters}
+                        className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium"
                       >
-                        <option value="">Any Size</option>
-                        <option value="1">Solo (1)</option>
-                        <option value="2">Duo (2)</option>
-                        <option value="3">Team of 3</option>
-                        <option value="4">Team of 4</option>
-                        <option value="5">Team of 5</option>
-                        <option value="6">Team of 6+</option>
-                      </select>
-                    </div>
-
-                    {/* Event Type Filter */}
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Event Type</label>
-                      <select
-                        value={filters.eventType}
-                        onChange={(e) => setFilters({...filters, eventType: e.target.value})}
-                        className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
-                      >
-                        <option value="">All Types</option>
-                        <option value="hackathon">Hackathon</option>
-                        <option value="competition">Competition</option>
-                        <option value="workshop">Workshop</option>
-                        <option value="bootcamp">Bootcamp</option>
-                      </select>
-                    </div>
+                        Clear
+                      </button>
+                    )}
                   </div>
                 </div>
-              )}
 
-              {/* Search Results Summary */}
-              {(searchQuery || getActiveFilterCount() > 0) && (
-                <div className="mt-2 text-xs text-gray-600">
-                  Showing {filteredHackathons.length} of {allHackathons.length} hackathons
-                  {searchQuery && (
-                    <span> for "<span className="font-medium">{searchQuery}</span>"</span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+                {/* Compact Filters Panel */}
+                {showFilters && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                      {/* Mode Filter */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Mode</label>
+                        <select
+                          value={filters.mode}
+                          onChange={(e) => setFilters({...filters, mode: e.target.value})}
+                          className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
+                        >
+                          <option value="">All Modes</option>
+                          <option value="online">Online</option>
+                          <option value="offline">Offline</option>
+                          <option value="hybrid">Hybrid</option>
+                        </select>
+                      </div>
 
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }, (_, i) => <LoadingSkeleton key={i} />)}
-            </div>
-          ) : (searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : allHackathons).length === 0 ? (
-            <EmptyState
-              title="No Hackathons Available"
-              message="Check back soon for exciting new hackathons and competitions!"
-            />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : allHackathons).slice(0, 6).map((hackathon) => (
-                <HackathonCard key={hackathon.hackCode} hackathon={hackathon} />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+                      {/* Fee Filter */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Registration</label>
+                        <select
+                          value={filters.hasFee}
+                          onChange={(e) => setFilters({...filters, hasFee: e.target.value})}
+                          className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
+                        >
+                          <option value="">All Types</option>
+                          <option value="free">Free</option>
+                          <option value="paid">Paid</option>
+                        </select>
+                      </div>
 
-      {/* Stats Section */}
-      <div className="bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-[#008622] mb-2">500+</div>
-              <div className="text-gray-600">Active Hackathons</div>
+                      {/* Team Size Filter */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Team Size</label>
+                        <select
+                          value={filters.teamSize}
+                          onChange={(e) => setFilters({...filters, teamSize: e.target.value})}
+                          className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
+                        >
+                          <option value="">Any Size</option>
+                          <option value="1">Solo (1)</option>
+                          <option value="2">Duo (2)</option>
+                          <option value="3">Team of 3</option>
+                          <option value="4">Team of 4</option>
+                          <option value="5">Team of 5</option>
+                          <option value="6">Team of 6+</option>
+                        </select>
+                      </div>
+
+                      {/* Event Type Filter */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Event Type</label>
+                        <select
+                          value={filters.eventType}
+                          onChange={(e) => setFilters({...filters, eventType: e.target.value})}
+                          className="w-full p-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-[#008622] focus:border-[#008622] hover:border-gray-400 transition-colors"
+                        >
+                          <option value="">All Types</option>
+                          <option value="hackathon">Hackathon</option>
+                          <option value="competition">Competition</option>
+                          <option value="workshop">Workshop</option>
+                          <option value="bootcamp">Bootcamp</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Search Results Summary */}
+                {(searchQuery || getActiveFilterCount() > 0) && (
+                  <div className="mt-2 text-xs text-gray-600">
+                    Showing {filteredHackathons.length} of {allHackathons.length} hackathons
+                    {searchQuery && (
+                      <span> for "<span className="font-medium">{searchQuery}</span>"</span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-[#008622] mb-2">10K+</div>
-              <div className="text-gray-600">Participants</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-[#008622] mb-2">₹5Cr+</div>
-              <div className="text-gray-600">Prize Money</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-[#008622] mb-2">100+</div>
-              <div className="text-gray-600">Partner Companies</div>
+
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }, (_, i) => <LoadingSkeleton key={i} />)}
+              </div>
+            ) : (searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : allHackathons).length === 0 ? (
+              <EmptyState
+                title="No Hackathons Available"
+                message="Check back soon for exciting new hackathons and competitions!"
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {(searchQuery || getActiveFilterCount() > 0 ? filteredHackathons : allHackathons).slice(0, 6).map((hackathon) => (
+                  <HackathonCard key={hackathon.hackCode} hackathon={hackathon} />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Stats Section */}
+        <div className="bg-white border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+              <div>
+                <div className="text-3xl font-bold text-[#008622] mb-2">500+</div>
+                <div className="text-gray-600">Active Hackathons</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#008622] mb-2">10K+</div>
+                <div className="text-gray-600">Participants</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#008622] mb-2">₹5Cr+</div>
+                <div className="text-gray-600">Prize Money</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#008622] mb-2">100+</div>
+                <div className="text-gray-600">Partner Companies</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
