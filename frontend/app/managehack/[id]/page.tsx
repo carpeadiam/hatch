@@ -133,6 +133,12 @@ function ManageHackPageContent() {
     // You might want to get this from context, props, or cookies
     return localStorage.getItem('auth_token');
   };
+  // Add this helper function to debug the state
+const debugScoreInputs = () => {
+  console.log('Current scoreInputs state:', JSON.stringify(scoreInputs, null, 2));
+};
+
+// Call this in strategic places, like after state updates or in useEffect
 
   const fetchHackathonData = async () => {
     try {
@@ -458,6 +464,21 @@ const isScoreInputActive = (teamId: string, phaseId: string): boolean => {
   const isActive = input !== undefined && input !== '';
   console.log(`Checking if score input active for team ${teamId}, phase ${phaseId}: ${isActive} (input: ${input})`);
   return isActive;
+};
+
+const clearScoreInput = (teamId: string, phaseId: string) => {
+  console.log(`Clearing score input for team ${teamId}, phase ${phaseId}`);
+  setScoreInputs(prev => {
+    const newState = { ...prev };
+    if (newState[teamId]) {
+      delete newState[teamId][phaseId];
+      // If no more phase inputs for this team, remove the team entry
+      if (Object.keys(newState[teamId]).length === 0) {
+        delete newState[teamId];
+      }
+    }
+    return newState;
+  });
 };
 
   // Helper function to calculate total score for a team
@@ -1261,62 +1282,63 @@ const isScoreInputActive = (teamId: string, phaseId: string): boolean => {
                           )}
                           
                           {/* Score Input Modal - Fixed positioning */}
-                          {isScoreInputActive(team.teamId, activePhaseId) && (
-                            <div 
-                              className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-4 mt-2 right-0"
-                              style={{ minWidth: '250px' }}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="mb-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Enter Score (0-100)
-                                </label>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  step="1"
-                                  placeholder="Score"
-                                  value={scoreInput}
-                                  onChange={(e) => {
-                                    console.log(`Score input changed for team ${team.teamId}: ${e.target.value}`);
-                                    handleScoreInputChange(team.teamId, activePhaseId, e.target.value);
-                                  }}
-                                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  autoFocus
-                                />
-                              </div>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log(`Save score clicked for team ${team.teamId} with value: ${scoreInput}`);
-                                    handleSaveScore(team.teamId, activePhaseId, scoreInput);
-                                  }}
-                                  disabled={!scoreInput || isNaN(parseInt(scoreInput)) || parseInt(scoreInput) < 0 || parseInt(scoreInput) > 100 || isSaving}
-                                  className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  {isSaving ? 'Saving...' : 'Save'}
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log(`Cancel score input for team ${team.teamId}`);
-                                    setScoreInputs(prev => ({
-                                      ...prev,
-                                      [team.teamId]: {
-                                        ...prev[team.teamId],
-                                        [activePhaseId]: ''
-                                      }
-                                    }));
-                                  }}
-                                  className="bg-gray-400 text-white px-3 py-2 rounded text-sm hover:bg-gray-500"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          )}
+{isScoreInputActive(team.teamId, activePhaseId) && (
+  <div 
+    className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-4 mt-2 right-0"
+    style={{ minWidth: '250px', border: '2px solid red' }} // Added red border for visibility
+    onClick={(e) => {
+      console.log('Score modal clicked');
+      e.stopPropagation();
+    }}
+  >
+    <div className="mb-2">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Enter Score (0-100) - Team: {team.teamId}
+      </label>
+      <input
+        type="number"
+        min="0"
+        max="100"
+        step="1"
+        placeholder="Score"
+        value={scoreInput}
+        onChange={(e) => {
+          console.log(`Score input changed for team ${team.teamId}: ${e.target.value}`);
+          handleScoreInputChange(team.teamId, activePhaseId, e.target.value);
+        }}
+        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-blue-500" // Added blue border
+        autoFocus
+      />
+      <div className="text-xs text-gray-500 mt-1">
+        Current state: {scoreInput}
+      </div>
+    </div>
+    <div className="flex gap-2">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          console.log(`Save score clicked for team ${team.teamId} with value: ${scoreInput}`);
+          debugScoreInputs(); // Debug current state
+          handleSaveScore(team.teamId, activePhaseId, scoreInput);
+        }}
+        disabled={!scoreInput || isNaN(parseInt(scoreInput)) || parseInt(scoreInput) < 0 || parseInt(scoreInput) > 100 || isSaving}
+        className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isSaving ? 'Saving...' : 'Save'}
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          console.log(`Cancel score input for team ${team.teamId}`);
+          clearScoreInput(team.teamId, activePhaseId);
+        }}
+        className="bg-gray-400 text-white px-3 py-2 rounded text-sm hover:bg-gray-500"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
                         </div>
                         
                         <div className="text-gray-400">
