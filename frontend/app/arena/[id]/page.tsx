@@ -62,7 +62,9 @@ interface HackathonData {
 }
 
 interface TeamData {
-  team: any;
+  team: any & {
+    status?: string; // Added status field
+  };
   teamId: string;
   teamName: string;
   members: Array<{
@@ -121,6 +123,11 @@ function HackathonSubmissionContent() {
       }
     }
   }, [existingSubmissions, activePhase, hackathonData]);
+
+  // Helper function to check if team is active
+  const isTeamActive = (): boolean => {
+    return teamData?.team?.status !== 'inactive';
+  };
 
   const fetchHackathonData = async () => {
     try {
@@ -313,14 +320,48 @@ function HackathonSubmissionContent() {
               </div>
             </div>
             {teamData && (
-              <div className="mt-4 md:mt-0 bg-blue-50 rounded-lg p-4">
-                <h3 className="font-semibold text-blue-900">Team: {teamData.team.teamName}</h3>
-                <p className="text-sm text-blue-700">Team ID: {teamData.team.teamId}</p>
+              <div className={`mt-4 md:mt-0 rounded-lg p-4 ${
+                isTeamActive() ? 'bg-blue-50' : 'bg-red-50'
+              }`}>
+                <h3 className={`font-semibold ${
+                  isTeamActive() ? 'text-blue-900' : 'text-red-900'
+                }`}>
+                  Team: {teamData.team.teamName}
+                </h3>
+                <p className={`text-sm ${
+                  isTeamActive() ? 'text-blue-700' : 'text-red-700'
+                }`}>
+                  Team ID: {teamData.team.teamId}
+                </p>
+                {!isTeamActive() && (
+                  <p className="text-sm text-red-700 font-medium mt-1">
+                    Status: Inactive
+                  </p>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Inactive Team Alert */}
+      {teamData && !isTeamActive() && (
+        <div className="bg-red-900 border-b border-red-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-red-100">Team Inactive</h3>
+                <p className="text-red-200">You are not part of this hackathon anymore. Submissions are not allowed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -433,6 +474,23 @@ function HackathonSubmissionContent() {
                       </div>
                     </div>
 
+                    {/* Team Inactive Warning */}
+                    {teamData && !isTeamActive() && (
+                      <div className="mb-6 bg-red-900 border border-red-700 rounded-lg p-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">!</span>
+                          </div>
+                          <p className="text-red-200 font-medium">
+                            You are not part of this hackathon anymore
+                          </p>
+                        </div>
+                        <p className="text-red-300 text-sm mt-1">
+                          Your team status is inactive. Submissions are not allowed.
+                        </p>
+                      </div>
+                    )}
+
                     {/* Submission Status Indicator */}
                     {hasSubmissionForPhase(index) && (
                       <div className="mb-6 bg-emerald-900 border border-emerald-700 rounded-lg p-4">
@@ -444,13 +502,15 @@ function HackathonSubmissionContent() {
                             Submission already made for this phase
                           </p>
                         </div>
-                        <p className="text-emerald-300 text-sm mt-1">
-                          You can update your submission below if the phase is still active.
-                        </p>
+                        {isTeamActive() && (
+                          <p className="text-emerald-300 text-sm mt-1">
+                            You can update your submission below if the phase is still active.
+                          </p>
+                        )}
                       </div>
                     )}
 
-                    {getPhaseStatus(phase) === 'active' && teamData ? (
+                    {getPhaseStatus(phase) === 'active' && teamData && isTeamActive() ? (
                       <div className="space-y-6">
                         <h3 className="text-lg font-semibold text-white">Submit Deliverables</h3>
                         {phase.deliverables.map((deliverable, deliverableIndex) => (
@@ -515,6 +575,12 @@ function HackathonSubmissionContent() {
                         {!teamData && (
                           <div className="bg-red-900 border border-red-700 rounded-lg p-4">
                             <p className="text-red-200">You need to be part of a team to submit deliverables.</p>
+                          </div>
+                        )}
+
+                        {teamData && !isTeamActive() && (
+                          <div className="bg-red-900 border border-red-700 rounded-lg p-4">
+                            <p className="text-red-200">You are not part of this hackathon anymore. Submissions are not allowed.</p>
                           </div>
                         )}
                       </div>
