@@ -1,13 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Instrument_Sans } from 'next/font/google';
-
-const instrumentSans = Instrument_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-instrument-sans',
-});
 import { useParams } from 'next/navigation';
 import Link from "next/link";
 
@@ -37,6 +30,15 @@ interface Sponsor {
   name: string;
 }
 
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  expiryDate: string;
+  createdBy: string | null;
+}
+
 interface HackathonData {
   admins: string[];
   eventDescription: string;
@@ -57,6 +59,7 @@ interface HackathonData {
   sponsors: Sponsor[];
   teamSize: string;
   imageUrl?: string;
+  announcements?: Announcement[];
 }
 
 interface HackathonStatus {
@@ -495,14 +498,6 @@ function ActionButton({ data }: { data: HackathonData }) {
 }
 
 export default function HackathonPage() {
-  return (
-    <div className={instrumentSans.className}>
-      <HackathonPageContent />
-    </div>
-  );
-}
-
-function HackathonPageContent() {
   const params = useParams();
   const [hackData, setHackData] = useState<HackathonData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -625,6 +620,46 @@ function HackathonPageContent() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Announcements */}
+            {hackData.announcements && hackData.announcements.filter(announcement => {
+              const now = new Date();
+              const expiryDate = new Date(announcement.expiryDate);
+              return expiryDate > now;
+            }).length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">📢 Announcements</h2>
+                <div className="space-y-4">
+                  {hackData.announcements
+                    .filter(announcement => {
+                      const now = new Date();
+                      const expiryDate = new Date(announcement.expiryDate);
+                      return expiryDate > now;
+                    })
+                    .map((announcement, index) => (
+                      <div key={announcement.id} className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded-r-lg">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{announcement.title}</h3>
+                        <p className="text-gray-700 mb-2">{announcement.content}</p>
+                        <div className="text-sm text-gray-600">
+                          <span>Posted: {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}</span>
+                          <span className="ml-4">Expires: {new Date(announcement.expiryDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}</span>
+                        </div>
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            )}
+
             {/* Description */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">About</h2>
@@ -728,23 +763,23 @@ function HackathonPageContent() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Code:</span>
-                  <span className="font-mono font-medium">{hackData.hackCode}</span>
+                  <span className="font-mono font-medium text-gray-900">{hackData.hackCode}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Mode:</span>
-                  <span className="font-medium capitalize">{hackData.mode}</span>
+                  <span className="font-medium capitalize text-gray-900">{hackData.mode}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Team Size:</span>
-                  <span className="font-medium">{hackData.teamSize} members</span>
+                  <span className="font-medium text-gray-900">{hackData.teamSize} members</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Max Teams:</span>
-                  <span className="font-medium">{hackData.maxTeams}</span>
+                  <span className="font-medium text-gray-900">{hackData.maxTeams}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Entry Fee:</span>
-                  <span className="font-medium">{hackData.hasFee ? 'Paid' : 'Free'}</span>
+                  <span className="font-medium text-gray-900">{hackData.hasFee ? 'Paid' : 'Free'}</span>
                 </div>
               </div>
             </div>
