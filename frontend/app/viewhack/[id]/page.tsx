@@ -60,6 +60,7 @@ interface HackathonData {
   teamSize: string;
   imageUrl?: string;
   announcements?: Announcement[];
+  registrations?: any[];
 }
 
 interface HackathonStatus {
@@ -772,6 +773,12 @@ export default function HackathonPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Team Size:</span>
                   <span className="font-medium text-gray-900">{hackData.teamSize} members</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Registered Teams:</span>
+                  <span className="font-medium text-gray-900">
+                    {hackData.registrations ? hackData.registrations.length : 0} / {hackData.maxTeams}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Max Teams:</span>
