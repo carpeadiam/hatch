@@ -1121,288 +1121,308 @@ function ManageHackPageContent() {
           </div>
         )}
 
-        {activeTab === 'judging' && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4">Judging</h2>
-            
-            {hackData.phases && hackData.phases.length > 0 ? (
-              <>
-                {/* Phase tabs */}
-                <div className="border-b border-gray-200 mb-6">
-                  <nav className="flex space-x-8">
-                    {hackData.phases.map((phase) => (
-                      <button
-                        key={phase.name}
-                        onClick={() => setActivePhaseId(phase.name)}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                          activePhaseId === phase.name
-                            ? 'border-blue-500 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        {phase.name}
-                        <br />
-                        <span className="text-xs text-gray-400">
-                          {formatDate(phase.startDate).split(',')[0]} - {formatDate(phase.endDate).split(',')[0]}
-                        </span>
-                      </button>
-                    ))}
-                  </nav>
-                </div>
+{activeTab === 'judging' && (
+  <div className="bg-white rounded-lg shadow p-6">
+    <h2 className="text-2xl font-semibold mb-4">Judging</h2>
+    
+    {hackData.phases && hackData.phases.length > 0 ? (
+      <>
+        {/* Phase tabs */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="flex space-x-8">
+            {hackData.phases.map((phase) => (
+              <button
+                key={phase.name}
+                onClick={() => setActivePhaseId(phase.name)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activePhaseId === phase.name
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {phase.name}
+                <br />
+                <span className="text-xs text-gray-400">
+                  {formatDate(phase.startDate).split(',')[0]} - {formatDate(phase.endDate).split(',')[0]}
+                </span>
+              </button>
+            ))}
+          </nav>
+        </div>
 
-                {/* Teams table for active phase */}
-                {hackData.registrations && hackData.registrations.length > 0 ? (
-                  <div className="space-y-4">
-                    {hackData.registrations.map((team) => {
-                      const submission = getTeamSubmission(team, activePhaseId);
-                      const currentScore = getCurrentScore(team, activePhaseId);
-                      const scoreInput = getScoreInput(team.teamId, activePhaseId);
-                      const saveKey = `${team.teamId}-${activePhaseId}`;
-                      const isSaving = scoreSaving[saveKey] || false;
-                      const isExpanded = expandedTeamIds.has(team.teamId);
-                      const hasSubmission = submission && submission.submissions && Object.keys(submission.submissions).length > 0;
+        {/* Teams table for active phase */}
+        {hackData.registrations && hackData.registrations.length > 0 ? (
+          <div className="space-y-4">
+            {hackData.registrations.map((team) => {
+              const submission = getTeamSubmission(team, activePhaseId);
+              const currentScore = getCurrentScore(team, activePhaseId);
+              const scoreInput = getScoreInput(team.teamId, activePhaseId);
+              const saveKey = `${team.teamId}-${activePhaseId}`;
+              const isSaving = scoreSaving[saveKey] || false;
+              const isExpanded = expandedTeamIds.has(team.teamId);
+              const hasSubmission = submission && submission.submissions && Object.keys(submission.submissions).length > 0;
+              
+              // Debug logging for score input state
+              console.log(`Team ${team.teamId} - Score input active: ${isScoreInputActive(team.teamId, activePhaseId)}`);
+              
+              return (
+                <div key={team.teamId} className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div 
+                    className="p-4 cursor-pointer hover:bg-gray-50 transition-colors" 
+                    onClick={() => {
+                      console.log(`Team ${team.teamId} clicked for expansion`);
+                      toggleTeamExpansion(team.teamId);
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-lg text-gray-800">
+                            {team.teamName || team.teamId}
+                          </h3>
+                          <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm">
+                            {getTotalMembersCount(team)} member{getTotalMembersCount(team) !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          {/* Submission Status */}
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${hasSubmission ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className={`text-sm ${hasSubmission ? 'text-green-700' : 'text-red-700'}`}>
+                              {hasSubmission ? 'Submitted' : 'Not submitted'}
+                            </span>
+                            {submission?.submittedAt && (
+                              <span className="text-xs text-gray-500">
+                                on {formatDate(submission.submittedAt)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                       
-                      return (
-                        <div key={team.teamId} className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div 
-                            className="p-4 cursor-pointer hover:bg-gray-50 transition-colors" 
-                            onClick={() => toggleTeamExpansion(team.teamId)}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <h3 className="font-semibold text-lg text-gray-800">
-                                    {team.teamName || team.teamId}
-                                  </h3>
-                                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-sm">
-                                    {getTotalMembersCount(team)} member{getTotalMembersCount(team) !== 1 ? 's' : ''}
-                                  </span>
+                      {/* Enhanced Score Section */}
+                      <div className="flex items-center gap-4">
+                        <div className="text-right relative">
+                          {currentScore !== undefined ? (
+                            // Score is already given
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                              <div className="flex items-center gap-2">
+                                <div className="text-2xl font-bold text-green-700">
+                                  {currentScore}
                                 </div>
-                                
-                                <div className="flex items-center gap-4">
-                                  {/* Submission Status */}
-                                  <div className="flex items-center gap-2">
-                                    <div className={`w-2 h-2 rounded-full ${hasSubmission ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                    <span className={`text-sm ${hasSubmission ? 'text-green-700' : 'text-red-700'}`}>
-                                      {hasSubmission ? 'Submitted' : 'Not submitted'}
-                                    </span>
-                                    {submission?.submittedAt && (
-                                      <span className="text-xs text-gray-500">
-                                        on {formatDate(submission.submittedAt)}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
+                                <div className="text-green-600">/100</div>
                               </div>
-                              
-                              {/* Enhanced Score Section */}
-                              <div className="flex items-center gap-4">
-                                <div className="text-right">
-                                  {currentScore !== undefined ? (
-                                    // Score is already given
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                                      <div className="flex items-center gap-2">
-                                        <div className="text-2xl font-bold text-green-700">
-                                          {currentScore}
-                                        </div>
-                                        <div className="text-green-600">/100</div>
-                                      </div>
-                                      <div className="text-xs text-green-600 mb-2">Scored</div>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleScoreInputChange(team.teamId, activePhaseId, currentScore.toString());
-                                        }}
-                                        className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors"
-                                      >
-                                        Edit Score
-                                      </button>
-                                    </div>
-                                  ) : hasSubmission ? (
-                                    // Has submission but no score
-                                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                                      <div className="text-sm font-medium text-orange-700 mb-2">
-                                        Awaiting Score
-                                      </div>
-                                      <div className="text-xs text-orange-600 mb-2">
-                                        Submitted
-                                      </div>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleScoreInputChange(team.teamId, activePhaseId, '');
-                                        }}
-                                        className="text-xs bg-orange-600 text-white px-2 py-1 rounded hover:bg-orange-700 transition-colors"
-                                      >
-                                        Add Score
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    // No submission
-                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                      <div className="text-sm text-gray-600">
-                                        No Submission
-                                      </div>
-                                      <div className="text-xs text-gray-500">
-                                        Cannot score
-                                      </div>
-                                    </div>
-                                  )}
-                                  
-                                  {/* Score Input Modal */}
-{isScoreInputActive(team.teamId, activePhaseId) && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div 
-      className="bg-white rounded-lg p-6 m-4 max-w-sm w-full"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <h4 className="font-medium mb-3">Enter Score for {team.teamName}</h4>
-      <input
-        type="number"
-        min="0"
-        max="100"
-        step="1"
-        placeholder="Score (0-100)"
-        value={scoreInput}
-        onChange={(e) => handleScoreInputChange(team.teamId, activePhaseId, e.target.value)}
-        className="w-full border border-gray-300 rounded px-3 py-2 mb-3"
-        autoFocus
-      />
-      <div className="flex gap-2">
-        <button
-          onClick={() => handleSaveScore(team.teamId, activePhaseId, scoreInput)}
-          disabled={!scoreInput || isNaN(parseInt(scoreInput)) || parseInt(scoreInput) < 0 || parseInt(scoreInput) > 100 || isSaving}
-          className="flex-1 bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 disabled:opacity-50"
-        >
-          {isSaving ? 'Saving...' : 'Save'}
-        </button>
-        <button
-          onClick={() => {
-            setScoreInputs(prev => ({
-              ...prev,
-              [team.teamId]: {
-                ...prev[team.teamId],
-                [activePhaseId]: ''
-              }
-            }));
-          }}
-          className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-                                </div>
-                                
-                                <div className="text-gray-400">
-                                  {isExpanded ? '▼' : '▶'}
-                                </div>
+                              <div className="text-xs text-green-600 mb-2">Scored</div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log(`Edit score clicked for team ${team.teamId}`);
+                                  handleScoreInputChange(team.teamId, activePhaseId, currentScore.toString());
+                                }}
+                                className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors"
+                              >
+                                Edit Score
+                              </button>
+                            </div>
+                          ) : hasSubmission ? (
+                            // Has submission but no score
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                              <div className="text-sm font-medium text-orange-700 mb-2">
+                                Awaiting Score
+                              </div>
+                              <div className="text-xs text-orange-600 mb-2">
+                                Submitted
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log(`Add score clicked for team ${team.teamId}`);
+                                  handleScoreInputChange(team.teamId, activePhaseId, '');
+                                }}
+                                className="text-xs bg-orange-600 text-white px-2 py-1 rounded hover:bg-orange-700 transition-colors"
+                              >
+                                Add Score
+                              </button>
+                            </div>
+                          ) : (
+                            // No submission
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                              <div className="text-sm text-gray-600">
+                                No Submission
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Cannot score
                               </div>
                             </div>
-                          </div>
+                          )}
                           
-                          {/* Expanded content */}
-                          {isExpanded && (
-                            <div className="border-t border-gray-200 bg-gray-50">
-                              <div className="p-4">
-                                {/* Team members */}
-                                <div className="mb-6">
-                                  <h4 className="font-medium text-sm mb-3 text-gray-800">Team Members:</h4>
-                                  <div className="flex flex-wrap gap-2">
-                                    {/* Team Leader */}
-                                    {team.teamLeader && (
-                                      <div className="bg-gradient-to-r from-green-100 to-green-200 border border-green-300 text-green-800 px-3 py-2 rounded-lg text-sm">
-                                        <div className="flex items-center gap-1">
-                                          <span className="font-medium">👑 {team.teamLeader.name || team.teamLeader.email || 'Team Leader'}</span>
-                                        </div>
-                                        {team.teamLeader.course && team.teamLeader.graduatingYear && (
-                                          <div className="text-xs text-green-700 mt-1">
-                                            {team.teamLeader.course} - {team.teamLeader.graduatingYear}
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                    {/* Team Members */}
-                                    {team.teamMembers && team.teamMembers.map((member, idx) => (
-                                      <div key={idx} className="bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-300 text-blue-800 px-3 py-2 rounded-lg text-sm">
-                                        <div className="font-medium">
-                                          {member.name || member.email || `Member ${idx + 1}`}
-                                        </div>
-                                        {member.course && member.graduatingYear && (
-                                          <div className="text-xs text-blue-700 mt-1">
-                                            {member.course} - {member.graduatingYear}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                                
-                                {/* Deliverables */}
-                                <div>
-                                  <h4 className="font-medium text-sm mb-3 text-gray-800">
-                                    Deliverables for {activePhaseId}:
-                                  </h4>
-                                  {hasSubmission ? (
-                                    <div className="space-y-3">
-                                      {Object.entries(submission.submissions!).map(([type, value], idx) => (
-                                        <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4">
-                                          <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                              <div className="flex items-center gap-2 mb-2">
-                                                <span className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide">
-                                                  {type}
-                                                </span>
-                                                {value && typeof value === 'string' && value.startsWith('http') && (
-                                                  <a
-                                                    href={value}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-2 py-1 rounded transition-colors"
-                                                  >
-                                                    🔗 Open Link
-                                                  </a>
-                                                )}
-                                              </div>
-                                              <p className="text-sm text-gray-700 break-all bg-gray-50 p-2 rounded">
-                                                {value}
-                                              </p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <div className="text-center py-8">
-                                      <div className="text-gray-400 text-4xl mb-2">📋</div>
-                                      <p className="text-gray-500 text-sm">No deliverables submitted for this phase</p>
-                                    </div>
-                                  )}
-                                </div>
+                          {/* Score Input Modal - Fixed positioning */}
+                          {isScoreInputActive(team.teamId, activePhaseId) && (
+                            <div 
+                              className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-4 mt-2 right-0"
+                              style={{ minWidth: '250px' }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="mb-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Enter Score (0-100)
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  step="1"
+                                  placeholder="Score"
+                                  value={scoreInput}
+                                  onChange={(e) => {
+                                    console.log(`Score input changed for team ${team.teamId}: ${e.target.value}`);
+                                    handleScoreInputChange(team.teamId, activePhaseId, e.target.value);
+                                  }}
+                                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  autoFocus
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log(`Save score clicked for team ${team.teamId} with value: ${scoreInput}`);
+                                    handleSaveScore(team.teamId, activePhaseId, scoreInput);
+                                  }}
+                                  disabled={!scoreInput || isNaN(parseInt(scoreInput)) || parseInt(scoreInput) < 0 || parseInt(scoreInput) > 100 || isSaving}
+                                  className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {isSaving ? 'Saving...' : 'Save'}
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log(`Cancel score input for team ${team.teamId}`);
+                                    setScoreInputs(prev => ({
+                                      ...prev,
+                                      [team.teamId]: {
+                                        ...prev[team.teamId],
+                                        [activePhaseId]: ''
+                                      }
+                                    }));
+                                  }}
+                                  className="bg-gray-400 text-white px-3 py-2 rounded text-sm hover:bg-gray-500"
+                                >
+                                  Cancel
+                                </button>
                               </div>
                             </div>
                           )}
                         </div>
-                      );
-                    })}
+                        
+                        <div className="text-gray-400">
+                          {isExpanded ? '▼' : '▶'}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 text-6xl mb-4">👥</div>
-                    <p className="text-gray-500 text-lg">No teams registered yet</p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">📊</div>
-                <p className="text-gray-500 text-lg">No phases defined yet. Please add phases first.</p>
-              </div>
-            )}
+                  
+                  {/* Expanded content */}
+                  {isExpanded && (
+                    <div className="border-t border-gray-200 bg-gray-50">
+                      <div className="p-4">
+                        {/* Team members */}
+                        <div className="mb-6">
+                          <h4 className="font-medium text-sm mb-3 text-gray-800">Team Members:</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {/* Team Leader */}
+                            {team.teamLeader && (
+                              <div className="bg-gradient-to-r from-green-100 to-green-200 border border-green-300 text-green-800 px-3 py-2 rounded-lg text-sm">
+                                <div className="flex items-center gap-1">
+                                  <span className="font-medium">👑 {team.teamLeader.name || team.teamLeader.email || 'Team Leader'}</span>
+                                </div>
+                                {team.teamLeader.course && team.teamLeader.graduatingYear && (
+                                  <div className="text-xs text-green-700 mt-1">
+                                    {team.teamLeader.course} - {team.teamLeader.graduatingYear}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {/* Team Members */}
+                            {team.teamMembers && team.teamMembers.map((member, idx) => (
+                              <div key={idx} className="bg-gradient-to-r from-blue-100 to-blue-200 border border-blue-300 text-blue-800 px-3 py-2 rounded-lg text-sm">
+                                <div className="font-medium">
+                                  {member.name || member.email || `Member ${idx + 1}`}
+                                </div>
+                                {member.course && member.graduatingYear && (
+                                  <div className="text-xs text-blue-700 mt-1">
+                                    {member.course} - {member.graduatingYear}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Deliverables */}
+                        <div>
+                          <h4 className="font-medium text-sm mb-3 text-gray-800">
+                            Deliverables for {activePhaseId}:
+                          </h4>
+                          {hasSubmission ? (
+                            <div className="space-y-3">
+                              {Object.entries(submission.submissions!).map(([type, value], idx) => (
+                                <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <span className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide">
+                                          {type}
+                                        </span>
+                                        {value && typeof value === 'string' && value.startsWith('http') && (
+                                          <a
+                                            href={value}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-2 py-1 rounded transition-colors"
+                                          >
+                                            🔗 Open Link
+                                          </a>
+                                        )}
+                                      </div>
+                                      <p className="text-sm text-gray-700 break-all bg-gray-50 p-2 rounded">
+                                        {value}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <div className="text-gray-400 text-4xl mb-2">📋</div>
+                              <p className="text-gray-500 text-sm">No deliverables submitted for this phase</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">👥</div>
+            <p className="text-gray-500 text-lg">No teams registered yet</p>
           </div>
         )}
+      </>
+    ) : (
+      <div className="text-center py-12">
+        <div className="text-gray-400 text-6xl mb-4">📊</div>
+        <p className="text-gray-500 text-lg">No phases defined yet. Please add phases first.</p>
+      </div>
+    )}
+  </div>
+)}
 
 
         {activeTab === 'leaderboard' && (
